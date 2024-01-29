@@ -1,0 +1,1 @@
+pip freeze > server_fastapi_py_pkg_ver.txt

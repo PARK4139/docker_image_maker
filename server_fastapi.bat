@@ -4,8 +4,10 @@ chcp 65001
 @Rem 윈도우즈에서는 docker desktop 을 실행시켜야 한다. 그렇지 않으면 error during connect: This error may indicate that the docker daemon is not running.: Post~~~ 에러 나온다
 @Rem 자꾸 에러떠서 docker desktop 재설치를 했다.
 @Rem 깃 허브로 docker 로그인
+docker login -u park4139
+도커허브인증토큰
 @Rem docker desktop 재실행
-
+@REM 도커데몬 실행
 
 
 
@@ -52,6 +54,10 @@ docker run --name server_fastapi_container -p 8080:80 server_fastapi_image:lates
 @REM -v [호스트 디렉토리]:[컨테이너 디렉토리] 호스트의 디렉토리와 컨테이너의 디렉토리를 공유
 
 
+@REM get request 테스트
+explorer http://localhost:8080/nav-items?index=1
+explorer localhost:8080/nav-items?index=1
+
 @REM # 실행된 도커컨테이너 에 명령 via interactive mode
 ls
 @REM # 현재 머신에 설치가능한 python3 최신 버전 확인
@@ -80,8 +86,10 @@ docker ps -a
 
 @REM 특정 도커컨테이너 실행(attached mode, interactive mode)
 docker ps -a
+sudo docker ps -a
 docker start -ai 도커컨테이너ID
-docker start -ai 99daddc88ffd
+docker start -ai 46c99efe3c5b
+sudo docker start -ai 46c99efe3c5b
 
 @REM 도커컨테이너 중지
 docker container ls -a | findstr server_alpine_container
@@ -120,15 +128,9 @@ git status | find "working tree clean"
 
 @REM  도커이미지 PUSH (to 도커허브)
 docker logs -f 도커컨테이너ID
-@REM 도커이미지 PUSH 전 태그명 변경
-docker tag hello-world pmckee/hello-world
+@REM 도커이미지 PUSH 전 도커이미지명 레파지토리와 연동되도록 설정
+docker tag server_fastapi_image park4139/server_fastapi_image
 @REM 도커이미지 PUSH
-docker push pmckee/hello-world
-docker pull pmckee/hello-world
-docker-compose up -d
-docker images
-@REM 참고자료 도커 공식 유튜브채널 영상 https://www.youtube.com/watch?v=iqqDU2crIEQ
+docker push park4139/server_fastapi_image
 
-
-
-@REM 익숙해지면 docker-compose 또는 k8s 써보자
+@REM _________________ 여기까지로서 이 프로젝트의 목적 달성했습니다.

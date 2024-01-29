@@ -29,7 +29,7 @@ FROM alpine:3.14
 
 # commands for alpine linux
 RUN apk update
-RUN apk upgrade
+# RUN apk upgrade # upgrade 는 함부로 하면 안된다는데?
 # RUN apk add py3-pip
 # RUN apk add --no-cache mysql-client
 # ENV PYTHONUNBUFFERED=1
@@ -113,14 +113,25 @@ WORKDIR /code
 # RUN pip install --no-cache-dir --upgrade -r /code/py_pkg_ver_for_linux.log
 # COPY ./fastapi_server.py /code/
 # alipine linux 에서는 systemctl 를 runit 로 대체하는 사용하는 경우가 높은 확률
+# RUN apk --no-cache add runit
 RUN apk --no-cache add vim
-RUN apk --no-cache add runit
-RUN apk --no-cache add docker
 RUN apk --no-cache add git
 RUN apk --no-cache add ffmpeg
-# mutagen 모듈을 사용하기 위한 종속성
-RUN apk --no-cache add build-base libffi-dev
-# --no-cache 옵션을 사용하면 패키지 캐시를 사용하지 않고 항상 최신의 패키지를 다운로드하여 설치, 에러도 회피를 할 수 있는듯. 단점은 도커레이어 캐싱을 쓰지 않기에 도커이미지 빌드 시간은 길어진다.
+RUN apk --no-cache add python3
+RUN apk --no-cache add docker
+RUN apk --no-cache add docker-compose
+# RUN apk --no-cache add rc-service
+# mutagen 패키지을 사용하기 위한 종속성
+# RUN apk --no-cache add build-base libffi-dev
+# docker 패키지을 사용하기 위한 종속성
+# RUN apk --no-cache add --update docker-cli
+# RUN apk --no-cache add --update docker openrc
+# RUN rc-update add docker boot
+# RUN reboot
+# AWS CLI 설치
+# RUN pip3 --no-cache-dir install awscli
+RUN apk update
+
 
 # Docker 서비스를 시작, 이게 도커데스크탑 실행하는 것과 동등한 것 같아 보이는데, 아 이게 도커데몬 실행을 의미하는 거구나.
 # 알파인 리눅스에서 Docker 서비스를 부팅 시 자동으로 시작하도록 설정하는 방법
@@ -131,22 +142,3 @@ RUN apk --no-cache add build-base libffi-dev
 # Q. RUN systemctl enable docker 랑  CMD dockerd 는 둘 중 하나만 쓰면 되는거야? 네 맞습니다.
 # docker 데몬 시작
 # systemctl start docker
-
-
-# 실행 # Q. app.main:app 가 뭐야?.  app 폴더의 main.py 의 class app() 또는 def app() 입니다.
-
-
-
-
-
-쓸모있는 예제로 연습
-ls -l
-touch ./temp/temp.txt
-mkdir temp
-ls -l ./temp/temp.txt
-chmod 700 ./temp/temp.txt
-ls -l ./temp/temp.txt
-rm -f ./temp/temp.txt
-rmdir ./temp
-ls -l
-

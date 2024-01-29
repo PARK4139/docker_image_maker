@@ -22,7 +22,7 @@ async def return_success():
 
 
 
-@app.get("/nav-item")  # 골라야한다면 이게 나는 좋은데
+@app.get("/nav-items")
 async def nav_item_by_index(index: int):
     try:
         # [print(sample) for sample in NAV_ITEMS ]

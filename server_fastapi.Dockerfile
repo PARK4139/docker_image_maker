@@ -22,7 +22,7 @@ COPY . .
 # RUN pip install --no-cache-dir --upgrade pytube
 # RUN pip install --no-cache-dir --upgrade tqdm
 
-# 종속성 도커레이어 캐싱 사용
+# 종속성 도커레이어 캐싱 사용 ?
 RUN pip install colorama
 RUN pip install bs4
 RUN pip install uvicorn
@@ -39,7 +39,6 @@ RUN pip install pydantic
 RUN pip install pytube
 RUN pip install tqdm
 
-
 # chcp 65001 대체
 RUN export LANG=en_US.UTF-8
 # RUN echo 테스트중입니다 # fail
@@ -48,7 +47,7 @@ RUN export LANG=en_US.UTF-8
 # CMD ["echo", "테스트중입니다"] # fail
 # RUN pip install --no-cache-dir --upgrade -r /code/server_fastapi_py_pkg_ver.log
 CMD ["uvicorn", "server_fastapi:app", "--host", "0.0.0.0", "--port", "80"]
-# CMD ["uvicorn", "server_fastapi:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"] # nginx 를 proxy 로 앞에 둘거면 "--proxy-headers" 옵션을 추가하세요 - fastapi 공식 문서 -
+# CMD ["uvicorn", "server_fastapi:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"] # nginx 서버를 proxy 서버로서 앞에 둘거면 "--proxy-headers" 옵션을 추가시도해보자 - fastapi 공식 문서 -
 
 
 

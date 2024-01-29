@@ -4950,7 +4950,7 @@ class FastapiServerUtil:
 
 class DataObjectUtil:
     class NavItem(BaseModel):
-        index: str
+        index: str = uuid4().hex + BusinessLogicUtil.get_time_as_('%Y%m%d%H%M%S%f') + BusinessLogicUtil.get_random_alphabet(),
         title: str
         href: str
         description: str

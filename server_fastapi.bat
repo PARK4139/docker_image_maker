@@ -119,6 +119,8 @@ docker image ls
 set commit_ment=fastapi 서버 도커파일 local test 완료
 set commit_ment=alpine linux 로 컨버팅 중인 커스텀 패키지
 set commit_ment=alpine linux 기반 fastapi 서버 도커파일 local test 완료
+set commit_ment=alpine linux 기반 파이썬 도커이미지 PUSH 완료(도커허브로)
+set commit_ment=fastapi 엔드포인트 업데이트
 git add *
 git commit -m "%commit_ment%"
 git push -u origin main

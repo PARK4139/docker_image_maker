@@ -1,11 +1,12 @@
 import inspect
 import os
 from typing import Union
-from fastapi import Request, HTTPException, UploadFile
+
 import uvicorn
 from fastapi import FastAPI
+from fastapi import HTTPException
 
-from pkg_park4139 import ColoramaColorUtil, DebuggingUtil, FileSystemUtil, FastapiServerUtil, StateManagementUtil, BusinessLogicUtil, TestUtil
+from pkg_park4139 import ColoramaColorUtil, DebuggingUtil, FileSystemUtil, FastapiServerUtil, StateManagementUtil
 
 NAV_ITEMS_JSON = StateManagementUtil.NAV_ITEMS_JSON
 NAV_ITEMS = FastapiServerUtil.init_and_update_json_file(NAV_ITEMS_JSON)
@@ -19,21 +20,19 @@ async def return_success():
     DebuggingUtil.print_ment_via_colorama(f"{inspect.currentframe().f_code.co_name}() 호출되었습니다", colorama_color=ColoramaColorUtil.LIGHTWHITE_EX)
     return {"success": f"fastapi 서버로서 {os.path.basename(__file__)}를 구동 중 입니다"}
 
-
-
-
 @app.get("/nav-items")
-async def nav_item_by_index(index: int):
+def get_nav_items():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    [print(sample) for sample in NAV_ITEMS]
+    return NAV_ITEMS
+
+@app.get("/nav-items/{index}")
+def get_nav_items_by_index(index: Union[int, None]):
     try:
-        # [print(sample) for sample in NAV_ITEMS ]
-        # print(rf'NAV_ITEMS : {NAV_ITEMS}')
-        # print(rf'type(NAV_ITEMS) : {type(NAV_ITEMS)}')
-        # print(rf'len(NAV_ITEMS) : {len(NAV_ITEMS)}')
         return NAV_ITEMS[index]
     except:
         DebuggingUtil.print_ment_fail(f"({len(NAV_ITEMS)})개의 등록된 nav_items 중, index 가 {index}인 nav_item 이 없습니다.")
         raise HTTPException(status_code=404, detail=f"({len(NAV_ITEMS)})개의 등록된 nav_items 중, index 가 {index}인 nav_item 이 없습니다.")
-
 
 
 if __name__ == "__main__":
@@ -59,4 +58,3 @@ if __name__ == "__main__":
         # log_level="info",
         # log_level="debug",
     )
-

@@ -5,11 +5,10 @@ chcp 65001
 @Rem 자꾸 에러떠서 docker desktop 재설치를 했다.
 @Rem 깃 허브로 docker 로그인
 @Rem docker desktop 재실행
+explorer "C:\ProgramData\Microsoft\Windows\Start Menu\Docker Desktop.lnk"
 
 @REM 도커이미지 빌드
 docker build -t server_alpine_image -f server_alpine.Dockerfile . || wsl -e sh -c "echo -e '\033[0;31m도커이미지 빌드 실패\033[0m';" && timeout 600 > nul
-
-@REM 도커이미지 빌드 확인
 docker image ls
 
 @REM 도커컨테이너 실행 via interactive mode
@@ -38,10 +37,10 @@ exit
 @rem 도커컨테이너 수행내용 새로운이미지에 저장
 docker commit 컨테이너ID 새로운이미지명
 
-@REM 실행중인 도커컨테이너 확인
+@REM 도커컨테이너 확인(실행중인)
 docker ps
 
-@REM 모든 도커컨테이너 확인
+@REM 도커컨테이너 확인(모든)
 docker ps -a
 
 @REM 특정 도커컨테이너 실행(attached mode, interactive mode)
@@ -73,8 +72,7 @@ docker rmi ef3c64bd5725
 docker image ls
 
 
-
-@REM  GIT PUSH
+@REM  도커이미지 빌드 프로젝트 PUSH (to 깃허브)
 set commit_ment=fastapi 서버 도커파일 local test 완료
 set commit_ment=alpine linux 로 컨버팅 중인 커스텀 패키지
 git add *
@@ -83,5 +81,18 @@ git push -u origin main
 git status | find "working tree clean"
 
 
+@REM  도커이미지 PUSH (to 도커허브)
+docker logs -f 도커컨테이너ID
+@REM 도커이미지 PUSH 전 태그명 변경
+docker tag hello-world pmckee/hello-world
+@REM 도커이미지 PUSH
+docker push pmckee/hello-world
+docker pull pmckee/hello-world
+docker-compose up -d
+docker images
+@REM 참고자료 도커 공식 유튜브채널 영상 https://www.youtube.com/watch?v=iqqDU2crIEQ
+
+
 
 @REM 익숙해지면 docker-compose 또는 k8s 써보자
+

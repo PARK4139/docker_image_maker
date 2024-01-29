@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}")
     print()
     print()
-    DebuggingUtil.commentize("fastapi 서버가 시작되었습니다")
+    DebuggingUtil.commentize("fastapi 서버가 uvicorn 에 의해 로컬테스트 모드로 시작되었습니다")
 
     # 스웨거 자동실행
     # FileSystemUtil.explorer(fr"{FastapiServerUtil.Settings.protocol_type[0]}://{FastapiServerUtil.Settings.host[0]}:{FastapiServerUtil.Settings.port[0]}/docs")

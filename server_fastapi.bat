@@ -42,8 +42,6 @@ type server_fastapi_py_pkg_ver.log
 
 @REM 도커이미지 빌드
 docker build -t server_fastapi_image -f server_fastapi.Dockerfile . || wsl -e sh -c "echo -e '\033[0;31m도커이미지 빌드 실패\033[0m';" && timeout 600 > nul
-
-@REM 도커이미지 빌드 확인
 docker image ls
 
 @REM 도커컨테이너 실행 via interactive mode
@@ -74,45 +72,63 @@ exit
 @rem 도커컨테이너 수행내용 새로운이미지에 저장
 docker commit 컨테이너ID 새로운이미지명
 
-@REM 실행중인 도커컨테이너 확인
+@REM 도커컨테이너 확인(실행중인)
 docker ps
 
-@REM 모든 도커컨테이너 확인
+@REM 도커컨테이너 확인(모든)
 docker ps -a
 
-@REM 도커컨테이너 중지/삭제
+@REM 특정 도커컨테이너 실행(attached mode, interactive mode)
+docker ps -a
+docker start -ai 도커컨테이너ID
+docker start -ai 99daddc88ffd
+
+@REM 도커컨테이너 중지
+docker container ls -a | findstr server_alpine_container
 docker container ls -a | clip
 docker stop 도커컨테이너ID
-docker stop 4a6a3806c3ef
-docker rm 도커컨테이너ID
-docker rm 2ab83ef570fe
+docker stop 99daddc88ffd
 docker container ls -a
 docker ps -a
-docker ps -qa | clip
+
+@REM 도커컨테이너 삭제
+docker container ls -a | findstr server_alpine_container
+docker container ls -a | clip
+docker rm 도커컨테이너ID
+docker rm 99daddc88ffd
+docker container ls -a
+docker ps -a
 
 @REM 도커이미지 삭제
 @REM docker rmi $(docker images -q)   linux 용
 docker image ls | clip
 docker rmi 도커이미지ID
-docker rmi caa9184772a4
+docker rmi ef3c64bd5725
 docker image ls
-docker images -q | clip
+
+
+@REM  도커이미지 빌드 프로젝트 PUSH (to 깃허브)
+set commit_ment=fastapi 서버 도커파일 local test 완료
+set commit_ment=alpine linux 로 컨버팅 중인 커스텀 패키지
+set commit_ment=alpine linux 기반 fastapi 서버 도커파일 local test 완료
+git add *
+git commit -m "%commit_ment%"
+git push -u origin main
+git status | find "working tree clean"
 
 
 
-@REM 도커이미지 삭제
-@REM 도커데스크탑 에서 도커컨테이너 삭제, 이게 상당히 편하다
+@REM  도커이미지 PUSH (to 도커허브)
+docker logs -f 도커컨테이너ID
+@REM 도커이미지 PUSH 전 태그명 변경
+docker tag hello-world pmckee/hello-world
+@REM 도커이미지 PUSH
+docker push pmckee/hello-world
+docker pull pmckee/hello-world
+docker-compose up -d
+docker images
+@REM 참고자료 도커 공식 유튜브채널 영상 https://www.youtube.com/watch?v=iqqDU2crIEQ
 
 
-모든 도커컨테이너 삭제
-@REM docker rm -f $(docker ps -qa)
-echo y | docker container prune
-
-모든 도커이미지 삭제
-echo y | docker image prune -a
-
-모든 도커컨테이너/도커이미지 삭제
-echo y | docker container prune
-echo y | docker image prune -a
 
 @REM 익숙해지면 docker-compose 또는 k8s 써보자

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-  # python 3.x 하위버전 호환을 위한코드
 __author__ = 'PARK4139 : Jung Hoon Park'
-
+# alpine linux 로 컨버팅 중인 커스텀 패키지
 import asyncio
 import inspect
 import json
@@ -1243,7 +1243,6 @@ class FileSystemUtil:
 
         # :: 한글 인코딩 setting
         os.system('export LANG=en_US.UTF-8 >nul')
-
 
         print(f'from : {target_abspath}')
         file_edited = f'{os.path.splitext(os.path.basename(target_abspath))[0]}.flac'

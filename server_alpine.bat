@@ -76,6 +76,7 @@ docker image ls
 
 @REM  GIT PUSH
 set commit_ment=fastapi 서버 도커파일 local test 완료
+set commit_ment=alpine linux 로 컨버팅 중인 커스텀 패키지
 git add *
 git commit -m "%commit_ment%"
 git push -u origin main

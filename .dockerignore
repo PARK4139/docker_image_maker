@@ -1,0 +1,31 @@
+#________________________________________________ important
+__pycache__
+.gitignore
+*.bat
+.idea
+.pytest_cache
+venv
+.venv
+#________________________________________________ directories
+$cache_mp3/
+$cache_fonts
+$cache_log
+$cache_mp3
+$cache_png
+$cache_prison
+$cache_sound
+$cache_tools
+$cache_work_for_music
+$cache_zip
+build
+pkg_yt_dlp
+pkg_alpine_linux
+pkg_concole_blurred
+pkg_jq
+#________________________________________________ files
+README.md
+server_fastapi_for_samples.py
+server_fastapi freeze py pkgs.bat
+server_fastapi.Dockerfile
+sprint_core.py
+test.py

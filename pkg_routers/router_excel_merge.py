@@ -17,8 +17,9 @@ from pkg_park4139_for_linux import DebuggingUtil, FastapiUtil, BusinessLogicUtil
 templates = Jinja2Templates(directory=r"pkg_web/templates")
 
 router = APIRouter()
-router.mount("/static", StaticFiles(directory="pkg_web/static"), name="static")
-router.mount("/static2", StaticFiles(directory="pkg_xls"), name="static2")
+# router.mount("/static", StaticFiles(directory="pkg_web/static"), name="static")
+# router.mount("/static2", StaticFiles(directory="pkg_xlsx"), name="static2")
+
 
 prefix_promised = "web"  # /web 는 다른 파일에 작성된 부분이다. 라우터를 다른 파일로 분리했기 때문에 이 부분은 유지보수하며 알아내기가 까다롭다 # 하드코딩
 default_redirection_page_without_prefix = '/excel-merge'
@@ -101,8 +102,8 @@ async def post_excel_merge2(files: List[UploadFile]):
     # 디렉토리를 재생성. 주의, 하위파일은 모두 삭제됨, 복구불가
     FileSystemUtil.truncate_tree(StateManagementUtil.DIRECTORY_XLS_TO_MERGE)
 
-    # 다운로드 되도록
-    file_name_downloaded = FileSystemUtil.get_target_as_nx(StateManagementUtil.MERGED_EXCEL_FILE)
-    return FileResponse(path = StateManagementUtil.MERGED_EXCEL_FILE, filename=file_name_downloaded,media_type='application/octet-stream')
+    # client 다운로드 폴더에 저장
+    file_name_downloaded = FileSystemUtil.get_target_as_nx(StateManagementUtil.FILE_MERGED_EXCEL_XLSX)
+    return FileResponse(path = StateManagementUtil.FILE_MERGED_EXCEL_XLSX, filename=file_name_downloaded, media_type='application/octet-stream')
 
 

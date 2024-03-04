@@ -1,14 +1,21 @@
 __author__ = 'PARK4139 : Jung Hoon Park'
 
+# as 는 별칭을 설정하는 키워드
 import inspect
 import os
+import random
+import re
 # -*- coding: utf-8 -*-  # python 3.x 하위버전 호환을 위한코드
 import sys
 import traceback
+from io import BytesIO, StringIO
 
+import pandas as pd
+import plotly.figure_factory as ff
 from PySide6.QtWidgets import QApplication
+from bs4 import ResultSet, BeautifulSoup
 
-from pkg_park4139_for_linux import TestUtil, TextToSpeechUtil, DebuggingUtil, BusinessLogicUtil
+from pkg_park4139_for_linux import TestUtil, DebuggingUtil, BusinessLogicUtil, StateManagementUtil, MySqlUtil, FinanceStockTickerUtil, FileSystemUtil, StockInfoUtil, SeleniumUtil
 
 
 class TestUtilReplica:
@@ -22,25 +29,30 @@ class TestUtilReplica:
     # 예시로 Account 번호를 DB에 넣는 객체는 singletone으로 유지.
     # Parent().name    parent.name   Child().name   child.name
     def pause():
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         DebuggingUtil.commentize(f"__________________________________________________{inspect.currentframe().f_code.co_name}")
         BusinessLogicUtil.print_today_time_info()
         os.system('pause >nul')
 
     @staticmethod
     def measure_seconds_performance(function):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         """시간성능 측정 데코레이터 코드"""
 
         # def wrapper(*args, **kwargs):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+
         def wrapper(**kwargs):  # **kwargs, keyword argument, dictionary 로 parameter 를 받음. named parameter / positional parameter 를 받을 사용가능?
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             # def wrapper(*args):# *args, arguments, tuple 로 parameter 를 받음.
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             # def wrapper():
-            DebuggingUtil.commentize("TEST START")
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             test_cycle_max_limit = 5
             if TestUtil.is_first_test_lap:
                 ment = rf"총 {test_cycle_max_limit}번의 시간성능측정 테스트를 시도합니다"
                 TestUtil.is_first_test_lap = False
-                TextToSpeechUtil.speak_ment(ment=ment, sleep_after_play=1)
-                DebuggingUtil.debug_as_cli(ment)
+                DebuggingUtil.print_ment_light_yellow(ment)
             seconds_performance_test_results = TestUtil.test_results
             import time
             time_s = time.time()
@@ -50,25 +62,29 @@ class TestUtilReplica:
             # function()
             time_e = time.time()
             mesured_seconds = time_e - time_s
-            DebuggingUtil.commentize(rf"시간성능측정 결과")
+            DebuggingUtil.print_ment_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}시간성능측정 결과")
             seconds_performance_test_results.append(f"{round(mesured_seconds, 2)}sec")
-            print(rf'seconds_performance_test_results : {seconds_performance_test_results}')
-            print(rf'type(seconds_performance_test_results) : {type(seconds_performance_test_results)}')
-            print(rf'len(seconds_performance_test_results) : {len(seconds_performance_test_results)}')
+            DebuggingUtil.print_ment_yellow(rf'seconds_performance_test_results : {seconds_performance_test_results}')
+            # DebuggingUtil.print_ment_yellow(rf'type(seconds_performance_test_results) : {type(seconds_performance_test_results)}')
+            DebuggingUtil.print_ment_yellow(rf'len(seconds_performance_test_results) : {len(seconds_performance_test_results)}')
             if len(seconds_performance_test_results) == test_cycle_max_limit:
-                TextToSpeechUtil.speak_ment("시간성능측정이 완료 되었습니다", sleep_after_play=0.55)
-                DebuggingUtil.commentize("TEST END")
+                DebuggingUtil.print_ment_yellow("시간성능측정이 완료 되었습니다")
+                DebuggingUtil.print_ment_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST END")
                 TestUtil.pause()
 
         return wrapper
 
     @staticmethod
     def measure_milliseconds_performance(function):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         """시간성능 측정 코드"""
 
         def wrapper(*args, **kwargs):
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             # def wrapper(*args):# *args, arguments, tuple 로 parameter 를 받음.
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             # def wrapper():
+            DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
             DebuggingUtil.commentize(f"__________________________________________________{inspect.currentframe().f_code.co_name}")
             test_cycle_max_limit = 5
             milliseconds_performance_test_result = []
@@ -86,7 +102,7 @@ class TestUtilReplica:
             print(rf'type(milliseconds_performance_test_result) : {type(milliseconds_performance_test_result)}')
             print(rf'len(milliseconds_performance_test_result) : {len(milliseconds_performance_test_result)}')
             if len(milliseconds_performance_test_result) == test_cycle_max_limit:
-                TextToSpeechUtil.speak_ments("시간성능측정이 완료 되었습니다", sleep_after_play=0.65)
+                DebuggingUtil.print_magenta("시간성능측정이 완료 되었습니다")
                 TestUtil.pause()
 
         return wrapper
@@ -107,16 +123,14 @@ class TestUtilReplica:
 
 
 def decorate_test_status_printing_code(function):
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+
     def wrapper():
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         DebuggingUtil.commentize(rf"test status")
         function()
 
     return wrapper
-
-
-@decorate_test_status_printing_code
-def print_with_test_status(status: str):
-    print(status)
 
 
 qss = """
@@ -145,8 +159,167 @@ test_loop_limit = 3
 
 
 @TestUtil.measure_seconds_performance_nth
-# @decorate_for_pause  # 테스트 루프 마다 정지 설정
-def test_sprint_core():
+def crawl_geo_info():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    driver = None
+    try:
+        driver = SeleniumUtil.get_driver_for_selenium()
+        target_url = 'https://www.google.com/search?q=현재위치'
+        DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+        driver.get(target_url)
+        page_src = driver.page_source
+        soup = BeautifulSoup(page_src, "lxml")
+        results: any
+        # results = soup.find_all("body")
+        results: ResultSet = soup.find_all("span", class_="BBwThe")  # 지역정보 한글주소
+        # results: ResultSet = soup.find_all("span", class_="fMYBhe") # 지역정보 영어주소
+        results: str = results[0].text
+        results_about_geo = results
+        DebuggingUtil.print_magenta(ment='지역정보  웹크롤링 완료')
+        DebuggingUtil.print_magenta(f'''results_about_geo :\n{results_about_geo}''')
+    finally:
+        # driver.close()
+        driver.quit()
+
+
+@TestUtil.measure_seconds_performance_nth
+def crawl_naver_weather():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    # 테이블이 존재하는 html url 에서 table 의 데이터를 가져올때 유용한 함수 pd.read_html()
+    # df = pd.read_html('http://m.infostock.co.kr/sector/sector_detail.asp?code=64&theme=2%uCC28%uC804%uC9C0&mode=w')[1]  # 막혀있음, 토큰이 필요한 듯, 이 방식으로는 안됨, selenium 으로는 시도해볼만 하다고 생각함.
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    driver = None
+    try:
+        driver = SeleniumUtil.get_driver_for_selenium()
+        target_url = 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=동안구+관양동+날씨'
+        DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+        driver.get(target_url)
+        page_src = driver.page_source
+        soup = BeautifulSoup(page_src, "lxml")
+        results: ResultSet = soup.find_all("div", class_="status_wrap")
+        results: str = results[0].text
+        # 데이터 클렌징
+        results: str = results.replace("오늘의 날씨", "오늘의날씨")
+        results: str = results.replace(" 낮아요", "낮아요")
+        results: str = results.replace(" 높아요", "높아요")
+        results: str = results.replace(" 체감", "체감온도")
+        results_refactored = results.split(" ")
+        results_refactored: [str] = [x for x in results_refactored if x.strip(" ") and x.strip("") and x.strip("\"") and x.strip("\'") and x.strip("\'\'")]  # 불필요 리스트 요소 제거 ( "" , "\"", " " ...)
+        results_refactored: [str] = [x for x in results_refactored if x.strip("현재")]  # 리스트 요소 "오늘의"
+        # 리스트 내 특정문자와 동일한 요소의 바로 뒷 요소를 가져와 딕셔너리에 저장 # 데이터의 key, value 형태가 존재하면서 순번이 key 다음 value 형태로 잘 나오는 경우 사용.
+        keys_predicted = ['온도', '체감온도', '습도', '서풍', '동풍', '남풍', '북풍', '북서풍', '미세먼지', '초미세먼지', '자외선', '일출', '오늘의날씨']
+        results_: dict = {}
+        for i in range(len(results_refactored) - 1):
+            for key_predicted in keys_predicted:
+                if results_refactored[i] == key_predicted:
+                    key = results_refactored[i]
+                    value = results_refactored[i + 1]
+                    results_[key] = value
+        results_refactored = results_
+        results: str = "\n".join([f"{key}: {value}" for key, value in results_refactored.items()])  # dict to str (개행을 시킨)
+        results_about_naver_weather = results
+        DebuggingUtil.print_magenta(ment='동안구 관양동 날씨 웹크롤링 완료')
+        DebuggingUtil.print_magenta(f'''results_about_naver_weather :\n{results_about_naver_weather}''')
+
+    finally:
+        # driver.close()
+        driver.quit()
+
+    # df = df[3:]  # 상위 3개의 행 제거
+    # DebuggingUtil.print_magenta(rf'''df : {df}''')
+
+
+@TestUtil.measure_seconds_performance_nth
+def crawl_pm_ranking():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    driver = None
+    try:
+        driver = SeleniumUtil.get_driver_for_selenium()
+        target_url = f'https://www.dustrank.com/air/air_dong_detail.php?addcode=41173103'
+        DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+        driver.get(target_url)
+        page_src = driver.page_source
+        soup = BeautifulSoup(page_src, "lxml")
+        # results = soup.find_all(href=re.compile("magnet"), id='link1') # <a class="sister" href="http://example.com/magnet" id="link1">Elsie</a>
+        results = soup.find_all("table", class_="datatable")  # <table class="datatable">foo!</div>
+        soup = BeautifulSoup(str(results), "lxml")
+        results = soup.find_all("table")[-1]
+        soup = BeautifulSoup(str(results), "lxml")
+        results = soup.find_all("table")[-1].text
+        results = results.split("\n")  # 리스트
+        results = [x for x in results if x.strip()]
+        results = [x for x in results if x.strip(",")]  # 리스트 요소 "," 제거
+        # results = [x + '\n' for x in results] #리스트 요소마다 \n prefix 로서 추가
+        head_1 = results[1]
+        head_2 = results[2]
+        # body = results[3]+'\n'*10
+        # body = re.split(r"[,!?]", results[3]) #, !, ? 이면 쪼개기
+        # pattern = r'\d{2}-\d{2}-\d{2} \d{2}:\d{2}[가-힣]+\(\d+\)[가-힣]+\(\d+\)'
+        pattern = r'(\d{2}-\d{2}-\d{2} \d{2}:\d{2})([가-힣]+\(\d+\))([가-힣]+\(\d+\))'  # 정규식을 () 로 부분 부분 묶으면 tuple 형태로 수집할 수 있다.
+        body = re.findall(pattern, results[3])
+        body = list(body)  # tuple to list
+        body = [list(item) for item in body]  # LIST 내 ITEM 이 TUPLE 일 때 ITEM 을 LIST 로 변환 #의도대로 잘 변했으~
+
+        # 리스트 요소를 3개 단위로 개행하여 str 에 저장
+        body_ = ""
+        for i in range(0, len(body), 1):
+            body_ = body_ + body[i][0] + body[i][1] + body[i][2] + "\n"
+        body = body_
+        # body = "\n".join(body) # list to str
+        results = f"{head_1}\t{head_2}\n{body}"
+
+        results_about_pm_ranking = results
+
+        DebuggingUtil.print_magenta(ment='미세먼지 초미세먼지 웹크롤링 완료')
+        DebuggingUtil.print_magenta(f'''results_about_pm_ranking :\n{results_about_pm_ranking}''')
+
+    finally:
+        # driver.close()
+        driver.quit()
+
+
+@TestUtil.measure_seconds_performance_nth
+def crawl_korean_ultrafine_dust():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    driver = None
+    try:
+        # # '전국초미세먼지'(bs4 way)
+        target_url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=전국초미세먼지'
+        DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+        driver = SeleniumUtil.get_driver_for_selenium()
+        driver.get(target_url)
+        page_src = driver.page_source
+        soup = BeautifulSoup(page_src, "lxml")
+        results: any
+        # results = soup.find_all("body")
+        results: ResultSet = soup.find_all("div", class_="detail_box")
+        results: str = results[0].text
+        results: str = results.replace("지역별 초미세먼지 정보", "")
+        results: str = results.replace("관측지점 현재 오전예보 오후예보", "")
+        results: str = results.replace("", "")
+        results___: [str] = results.split(" ")
+        results___: [str] = [x for x in results___ if x.strip(" ") and x.strip("") and x.strip("\"") and x.strip("\'") and x.strip("\'\'")]  # 불필요 리스트 요소 제거 ( "" , "\"", " " ...)
+
+        # 리스트 요소를 4개 단위로 개행하여 str 에 저장
+        results_: str = ""
+        for i in range(0, len(results___), 4):
+            if i == len(results___):
+                pass
+            results_ = f"{results_}\t{results___[i]}\t{results___[i + 1]}\t{results___[i + 2]}\t{results___[i + 3]}\n"
+        results___ = results_
+        results_about_nationwide_ultrafine_dust = results___
+
+        DebuggingUtil.print_magenta(ment='초미세먼지 웹크롤링 완료')
+        DebuggingUtil.print_magenta(f'''results_about_nationwide_ultrafine_dust :\n{results_about_nationwide_ultrafine_dust}''')
+
+    finally:
+        # driver.close()
+        driver.quit()
+
+
+@TestUtil.measure_seconds_performance_nth
+def test_core_etc():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
     try:
         # cmd = rf'python "{test_target_file}"' # SUCCESS # 가상환경이 아닌 로컬환경에서 실행이 됨.
         # cmd = rf'start cmd /k "{test_helping_bat_file}" {test_target_file}'  # SUCCESS # 가상환경에서 실행 # 새 cmd.exe 창에서 열린다
@@ -157,8 +330,8 @@ def test_sprint_core():
         # cmd = rf'start cmd /c "{test_helping_bat_file}" {test_target_file}'  # SUCCESS # 가상환경에서 실행 # 새 cmd.exe 창에서 열린다 #이걸로 선정함
         # park4139.get_cmd_output(cmd)
 
-        # Park4139.debug_as_cli(f"test")
-        # Park4139.debug_as_gui(f"test")
+        # DebuggingUtil.print_magenta(f"test")
+        # print(f"test")
 
         # Park4139.ask_to_google(question)
         # Park4139.ask_to_bard(question)
@@ -170,212 +343,6 @@ def test_sprint_core():
         # Park4139.get_comprehensive_weather_information_from_web()
         # app.exec()
 
-        # __________________________________________________________________________________________________________________________________ TESTED SECTION 1 S
-        # import os
-        #
-        # import matplotlib
-        # import pandas as pd  # 데이터 분석용
-        # # import metaplotlib # pip install metaplotlib --upgrade
-        # import numpy as np  # pip install numpy --upgrade
-        # import FinanceDataReader as fdr  # alt+f12 # pip install -U finance-datareader #  FinanceDataReade.chart.plot()는 plotly에 의존성이 있습니다. pip install plotly --upgrade 를 진행하세요
-        # from PySide6.QtCore import QCoreApplication
-        # from PySide6.QtWidgets import QApplication
-        #
-        # import pkg_park4139_for_linux
-        #
-        # # pyside6의 app이 없으면 pyside6 app을 만들어줌.
-        # app: QApplication
-        # if QCoreApplication.instance() == None:
-        #     app = QApplication()
-        #
-        # # DataReader() 거래소주식정보(*,시세정보) 를 가져옴
-        # # 005930 삼성전자
-        # # fdr_dr = fdr.DataReader("005930") # 모든기간
-        # # fdr_dr = fdr.DataReader("005930", "2021-01-01", "2022-02-23") # 특정기간
-        # fdr_dr = fdr.DataReader("005930", "2023")  # 특정기간(특정년도)
-        # #
-        # # fdr_dr = fdr.DataReader('000150', '2018-01-01', '2019-10-30', exchange='KRX')  # 두산
-        # # fdr_dr = fdr.DataReader('000150', '2018-01-01', '2019-10-30', exchange='SZSE')  # Yihua Healthcare Co Ltd
-        # # fdr_dr = fdr.DataReader('036360', exchange='KRX-DELISTING') # KRX에서 상장폐지된
-        #
-        # # StockListing() 거래소주식정보(*,거래소상장주식목록)  가져옴
-        # # df = fdr.StockListing('SSE')  # 상해
-        # # df = fdr.StockListing('KONEX') # 코넥스
-        # # df = fdr.StockListing('SZSE')
-        # # df = fdr.StockListing('KRX')  # 한국
-        # # df = fdr.StockListing('KOSDAQ')
-        # # df = fdr.StockListing('KOSPI')
-        # # df = fdr.StockListing('S&P500')
-        # # df = fdr.StockListing('NYSE')  # 뉴욕거래소
-        #
-        # # test_result = df.plot.
-        #
-        # # sr = pd.Series(index=["피자", "치킨", "콜라", "맥주"], data=[17000, 18000, 1000, 5000])
-        # # test_result = f"""
-        # # {sr}
-        # #
-        # # {'-' * 79}
-        # #
-        # # index : {sr.index}
-        # # values : {sr.values}
-        # # """
-        # # dialog = pkg_park4139_for_linux.CustomDialogReplica(title="1차원데이터배열 출력 테스트결과 ( feat. pandas.시리즈 자료구조)", contents=test_result, buttons=["확인"])
-        # # dialog.exec_()
-        # #
-        # #
-        # #
-        # #
-        # #
-        # #
-        # # columns=['학번', '이름', '점수']
-        # # data = [
-        # #     ['1000', 'Steve', 90.72],
-        # #     ['1001', 'James', 78.09],
-        # #     ['1002', 'Doyeon', 98.43],
-        # #     ['1003', 'Jane', 64.19],
-        # #     ['1004', 'Pilwoong', 81.30],
-        # #     ['1005', 'Tony', 99.14],
-        # # ]
-        # # df = pd.DataFrame(data=data, columns=columns)
-        # # test_result= str(df)
-        # # dialog = pkg_park4139_for_linux.CustomDialogReplica(title="2차원데이터배열 출력 테스트결과 ( df 찐활용 feat. list )", contents=test_result, buttons=["확인"])
-        # # dialog.exec_()
-        #
-        # # data = {
-        # #     '학번' : ['1000', '1001', '1002', '1003', '1004', '1005'],
-        # #     '이름' : [ 'Steve', 'James', 'Doyeon', 'Jane', 'Pilwoong', 'Tony'],
-        # #     '점수': [90.72, 78.09, 98.43, 64.19, 81.30, 99.14]
-        # #     }
-        # #
-        # # index=None # df 의 index 파라미터의 default , 자동증가숫자가 auto fill 됨
-        # # # index=pd.RangeIndex(start=0, stop=5, step=1) # df 의 index 제어
-        # # df = pd.DataFrame(data, index=index)
-        # # # test_result= df.to_string() # 모든 줄 보기(데이터조회)
-        # # # test_result= df.head(3).to_string() # 3 줄만 보기(데이터조회)
-        # # # test_result= df['학번'].to_string() # 특정 컬럼만 보기(데이터조회)
-        # # # test_result= df['학번'].to_string(index=False) # 특정 컬럼만 보기(데이터조회)
-        # # test_result= df['학번'].to_string() # 특정 컬럼만 보기(데이터조회)
-        # # dialog = pkg_park4139_for_linux.CustomDialogReplica(title="2차원데이터배열 출력 테스트결과 ( df 찐활용 feat. dict )", contents=test_result, buttons=["확인"])
-        # # dialog.exec_()
-        #
-        # # FILE_XLS = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_recycle_bin\test.xlsx"
-        # # # df = pd.read_csv(FILE_CSV)
-        # # # df = pd.read_sql(FILE_SQL)
-        # # # df = pd.read_html(FILE_HTML)
-        # # df = pd.read_excel(FILE_XLS)
-        # # test_result = df.to_string()
-        # # dialog = pkg_park4139_for_linux.CustomDialogReplica(title="csv파일의 2차원데이터배열 출력 테스트결과", contents=test_result, buttons=["확인"])
-        # # dialog.exec_()
-        #
-        # # pandas 공부 후기
-        # # 엑셀에 있는 데이터들 처럼 데이터배열 을 예쁘게 해주는 라이브러리
-        # # sr(series) 는 key, value 형태의 1차원배열데이터 에 사용. df 기능으로 대체가 되므로 굳이 잘 안쓸듯.
-        # # df(dataframe) 은 2차원배열데이터에 사용. 즉, 엑셀처럼 사용, 엄청유용할 듯
-        # # df 를 출력하면 기본적으로 auto increment number 가 auto fill 된다!, 유용함!, 근데 지우는 방법도 찾아보기
-        # # csv/txt/xls/sql/html/json 파일 읽어올 수 있다고 하는데, html 도 되는데? 크롤링과 연계할 때 편리한 부분이 있을 수 있겠다
-        #
-        # data: np.ndarray
-        # data = np.array([[10, 20, 30], [40, 50, 60], [70, 80, 90]])  # 하드코딩으로 데이터배열
-        # # data = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])  # 하드코딩으로 데이터배열
-        # # data = np.zeros(shape=(3,3)) # shape=(3,3)인 배열에 모든 값이 0
-        # # data = np.ones(shape=(3,3)) # shape=(3,3)인 배열에 모든 값이 1
-        # # data = np.eye(3)# shape=(3,3)인 배열에 대각선 값이 1, 나머지 값이 0, 이거 활용도 높을 수 있겠다. 100  010  001 이런 순서 필요할때 있지 않겠나?
-        # # data = np.random.random((2,2)) # shape=(3,3)인 배열에 모든 값이 1보다 작은 float(1인 경우가 있나 모르겠음)
-        # # data = np.full(shape=(2,3), 7)#  # shape=(3,3)인 배열에 모든 값이 7
-        # # data = np.arange(10) #배열개수가 10 인 1차원데이터배열 # 0~9
-        # # data = np.arange(0, 10, 1) # 시작0, 종료10, 1씩증가 인1차원데이터배열 # 0~9
-        # # data = [i for i in range(0,10,1)] # 0~9
-        # # data = np.array(np.arange(30)).reshape((5, 6)) # shape = (5,6) 으로 reshape 한다, shape 안의 숫자들(5, 6) 을 곱(5 x 6)하면 원데이터의 개수(5 x 6 = 30)인와 같게 설정해야 된다. 실험해봐도 이게 맞음, list를 적당한 간격으로 자를때 유용하겠다!
-        # # data = data[0, :]# 첫번째 줄 출력
-        # # data = data[:,0]# 첫번째 기둥 출력
-        # # data = data[1,1]# 특정위치의 원소
-        # # data = data[[0, 2], [2, 0]]  # 특정 위치의 원소 두 개를 가져와 새로운 배열 # data[0, 2] 와 data[2, 0] 를 가져와 새로운 배열에 넣었습니다
-        # # data = data[0, 2] + data[2, 0] # 원소 두개를 가져와, 합을 구한다
-        # # data = data[0, 2] * data[2, 0] # 곱을 구한다, 이는 행렬에 대한 곱이 아니다. 좌표에 대한 곱이다
-        # # data = data[0, 2] ** data[2, 0] # 거듭제곱을 구한다
-        # # data = data[0, 2] / data[2, 0] # 나눈 결과를 구한다 Q + R/B  B = 나누는 수
-        # # data = data[0, 2] // data[2, 0] # 몫을 구한다
-        # # data = data[0, 2] % data[2, 0] # 나머지를 구한다
-        # # data_ = np.dot(data1, data2)# 행렬곱
-        # # test_result = f"""
-        # # mat 의 data           :
-        # # {str(data)}
-        # #
-        # # mat 의 축의 개수       :
-        # # {data.ndim}
-        # #
-        # # mat 의 배열의 모양     :
-        # # {data.shape}
-        # # """
-        # # dialog = pkg_park4139_for_linux.CustomDialogReplica(title="2차원데이터배열 출력 테스트결과 ( feat. numpy )", contents=test_result, buttons=["확인"])
-        # # dialog.exec_()
-        #
-        # # numpy 공부 후기
-        # # 배열은 행렬과 같은 관계처럼 느껴졌다.
-        # # 다차원 행렬 자료구조 : 그냥 엑셀에서 사용하는 자료구조.
-        # # ndarray 는 다차원 행렬 자료구조로 되어 있다.
-        # # shape 배열의 생김새 정도 겠다, 표현은 shape=(3,3) 이런 형태
-        # # 실험을 해보니 첫번째 shape=(줄번호, 기둥번호) 정도로 생각하면 되겠다
-        # # 이제는 shape=(100,101) 이런 코드를 보면 데이터배열을 상상할 때 어떤 모양인지 알겠다.
-        #
-        # # 행렬 공부 후기
-        # # 행렬은 좌표 같다.
-        # # 행렬의 연산은 각 좌표끼리 더하거나 곱하는 것과 같다.
-        #
-        # import matplotlib.pyplot as plt
-        #
-        # # dir /b /s *.ttf | clip 으로 추출
-        # # plt.rcParams['font.family'] ='Malgun Gothic' # 한글폰트 적용
-        # font_abspath = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_fonts\GmarketSans\GmarketSansTTFLight.ttf"
-        # # font_abspath = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_fonts\Rubik_Doodle_Shadow\RubikDoodleShadow-Regular.ttf" # 너무 귀여운 입체감 있는 영어폰트
-        # plt.rcParams['font.family'] = pkg_park4139_for_linux.Park4139.get_font_name_for_mataplot(font_abspath)
-        # plt.rcParams['figure.facecolor'] = 'black'  # '바탕색'
-        # plt.rcParams['axes.edgecolor'] = 'white'  # '테두리 색'
-        # plt.rcParams['axes.facecolor'] = 'black'  # '바탕색'
-        #
-        # # 제목 설정
-        # plt.title('그래프 제목', color='white')
-        #
-        # # 빨간 꺽은선 그래프
-        # x = [1, 2, 3, 4, 5]
-        # y = [2, 4, 6, 8, 10]
-        # plt.plot(x, y, color="red")
-        #
-        # # 노란 꺽은선 그래프
-        # plt.plot([1.5, 2.5, 3.5, 4.5], [3, 5, 8, 10], color="yellow")  # 라인 새로 추가
-        #
-        # # 범례 설정
-        # legend = plt.legend(['학생 A', '학생 B'], facecolor='k', labelcolor='white')
-        # ax = plt.gca()
-        # leg = ax.get_legend()
-        # leg.legendHandles[0].set_color('red')
-        # leg.legendHandles[1].set_color('yellow')
-        #
-        # # 전체화면 설정
-        # # mng = plt.get_current_fig_manager()
-        # # mng.full_screen_toggle()
-        #
-        # # 레이블 설정
-        # plt.xlabel('x 축 레이블', color='white')
-        # plt.ylabel('y 축 레이블', color='white')
-        # plt.tick_params(labelcolor='white')
-        #
-        # plt.show()
-        #
-        # # Matplotlib 공부 후기
-        # # 읽는 법 : 맷플롯립 이라고 읽는다.
-        # # 데이터 시각화 패키지 : 쉽게 데이터로 차트를 그려주는 도구
-        # # 설치 : pip install matplotlib --upgrade
-        # # import 시 네이밍 관례 : as plt 로 import 한다 : import matplotlib.pyplot as plt
-        # # 조아써 이제 그래프 그릴 수 있어
-        #
-        # # pyside6의 app이 없으면 pyside6 app을 실행
-        # try:
-        #     app.exec()
-        # except:
-        #     pass
-
-        # __________________________________________________________________________________________________________________________________ TESTED SECTION 1 E
         # __________________________________________________________________________________________________________________________________ TESTED SECTION 2
         # dialog =  pkg_park4139_for_linux.CustomDialog(contents="테스트를 시작할까요?", buttons=["시작하기", "시작하지 않기"])
         # dialog.exec()
@@ -386,7 +353,7 @@ def test_sprint_core():
         # dialog.show()
         # text_of_clicked_btn = dialog.text_of_clicked_btn
         # DebuggingUtil.commentize("text_of_clicked_btn")
-        # Park4139.debug_as_cli(text_of_clicked_btn)
+        # DebuggingUtil.print_magenta(text_of_clicked_btn)
         # if text_of_clicked_btn == "제출":
         #     Park4139.download_from_youtube_to_webm(dialog.box_for_editing_input_text.text())
 
@@ -399,8 +366,10 @@ def test_sprint_core():
         # class CustomDialogThread(QThread):
         #     show_dialog_signal = Signal()
         #     def run(self):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #         self.show_dialog_signal.emit()
         # def show_dialog():
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #     from pkg_park4139_for_linux import CustomDialog
         #     dialog = CustomDialog(contents="테스트를 시작할까요?", buttons=["시작하기", "시작하지 않기"])
         #     # dialog.exec()
@@ -413,7 +382,6 @@ def test_sprint_core():
 
         # __________________________________________________________________________________________________________________________________  UP (TESTED SUCCESS)
         app = QApplication()
-        import sprint_core  # sprint_core.py 테스트
         app.exec()
         # __________________________________________________________________________________________________________________________________ BELOW (NOT TESTED YET)
 
@@ -472,7 +440,7 @@ def test_sprint_core():
         #     else:
         #         results_.append(item)
         # results: [str] = results_
-        # Park4139.debug_as_gui(context=f"{results}")
+        # print(context=f"{results}")
 
         # 파이썬 리스트의 요소홀수가 key 요소짝수가 value 로서 dict 에 넣기
         # results_: dict = {}
@@ -613,6 +581,7 @@ def test_sprint_core():
         # 1번만 돌도록 성능개량, 하으...그래도 3초 넘개 걸림. 공부한 쓰레드 적용해보자!
 
         # def get_files_cnt_of_directory(directory):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #     """
         #     사용법
         #     file_count = get_files_cnt_of_directory(directory_abspath)
@@ -667,12 +636,14 @@ def test_sprint_core():
         # current_directory_state = sorted(current_directory_state.items(), key=lambda item: item[1], reverse=True)  # dict to [tuple] (딕셔너리를 value(mtime)를 기준으로 내림차순으로 정렬), 날짜를 제일 현재와 가까운 날짜를 선택하는 것은 날짜의 숫자가 큰 숫자에 가깝다는 이야기이다. 그러므로  큰 수부터 작은 수의 순서로 가는 내림차순으로 정렬을 해주었다(reverse=True).
         # current_directory_state = "\n".join(current_directory_state)  # list to str ([str] to str)
         # current_directory_state = sorted(current_directory_state.items(), key=lambda item: item[0]) # dict to [tuple] (딕셔너리를 key를 기준으로 오름차순으로 정렬)
+
         # current_directory_state = sorted(current_directory_state.items(), key=lambda item: item[1]) # dict to [tuple] (딕셔너리를 value를 기준으로 오름차순으로 정렬)
         # current_directory_state = sorted(current_directory_state, key=lambda item: item[2])  # tuple 2차원 배열의 특정 열의 오름차순 정렬, # 람다의 쉬운 예로 볼 수 있겠다.
         # current_directory_state = {key: value for key, value in current_directory_state} # list to dict
         # dict to list (리스트 내의 파일목록의 순서를 파일변경일순으로 변경) ,  람다는 익명함수이며, return 형태도 같이 작성한다,  은 호출은 lambda_function(current_directory_state),  정의는 lambda_function(item), reuturn item[2] 이런 느낌이다
         # current_directory_state = "\n".join([f"{key}: {value}" for key, value in current_directory_state.items()])  # dict to str (개행을 시킨)
         # def _get_processed_abspaths_and_mtimes(abspaths:[str], mtimes:[str]):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #     # 비동기 처리 설정 ( advanced  )
         #     import threading
         #     nature_numbers = [n for n in range(1, 101)]  # from 1 to 100
@@ -704,6 +675,7 @@ def test_sprint_core():
         #
         #     # 비동기 이벤트 함수 설정 ( advanced  )
         #     async def is_containing_special_characters(start_index: int, end_index: int):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #         abspaths_and_mtimes = Park4139List.get_list_added_elements_alternatively(abspaths[start_index:end_index], mtimes[start_index:end_index])  # from [1, 2, 3] + [ x, y, z] to [1, x, 2, y, 3, z]
         #         abspaths_and_mtimes_ = Park4139List.get_nested_list_grouped_by_each_two_elements_in_list(abspaths_and_mtimes)  # from ["a", "b", "c", "d"] to [["a","b"], ["c","d"]]
         #         abspaths_and_mtimes__ = Park4139List.get_nested_list_sorted_by_column_index(nested_list=abspaths_and_mtimes_, column_index=1, decending_order=True)
@@ -712,6 +684,7 @@ def test_sprint_core():
         #
         #     # 비동기 이벤트 루프 설정
         #     def run_async_event_loop(start_index: int, end_index: int ):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #         loop = asyncio.new_event_loop()
         #         asyncio.set_event_loop(loop)
         #         loop.run_until_complete(is_containing_special_characters(start_index, end_index))
@@ -864,6 +837,7 @@ def test_sprint_core():
         # result_list = [None] * len(abspaths_and_mtimes)
         #
         # def process_work_divided(start_index, end_index):
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         #     # 예약된 단어 맵으로 암호화
         #     for index, abspaths_and_mtime in enumerate(abspaths_and_mtimes[start_index:end_index], start=start_index):
         #         tmp = Park4139Performance.dictionary_for_monitoring_performance.items()
@@ -990,350 +964,11 @@ def test_sprint_core():
         #
         # 다마고치 게임, 바탕화면에서 디지털몬스터 키우는 게임.
         #
-        # 서른넘어 수학공부
         #
         #
-        # 함수목록  최신화일시="2023년 12월 30일 (토) 10:25:44"
-        # def activate_window_by_pid(pid: int):
-        # def aes_decrypt(key, ciphertext):
-        # def aes_encrypt(key, plaintext):
-        # def afterpause(function):
-        # def ask_something_to_ai():
-        # def ask_something_to_ai(self):
-        # def ask_to_bard(question: str):
-        # def ask_to_google(question: str):
-        # def ask_to_web(question):
-        # def ask_to_wrtn(question: str):
-        # def bkup_biggest_targets():
-        # def bkup_by_manual(target_abspath):
-        # def bkup_db_toml():
-        # def bkup_smallest_targets():
-        # def bkup(target_abspath):
-        # def move_this_window_to_front(self):
-        # def move_window_to_front_by_pid(pid):
-        # def bubble_sort_nested_list(nested_list, column_index):
-        # def centerOnScreen(self):
-        # def change_console_color():
-        # def classify_targets_between_smallest_targets_biggest_targets():
-        # def click_center_of_img_recognized_by_mouse_left(img_abspath: str, recognize_loop_limit_cnt=0, is_zoom_toogle_mode=False):
-        # def click_mouse_left_btn(abs_x=None, abs_y=None):
-        # def click_mouse_right_btn(abs_x=None, abs_y=None):
-        # def close(self):
-        # def cls():
-        # def commentize(title):
-        # def compress_string(original_string):
-        # def connect_remote_rdp1():
-        # def connect_to_remote_computer_via_chrome_desktop():
-        # def convent_bytes_to_str(target: bytes):
-        # def convent_str_to_bytes(target: str):
-        # def convert_as_zip_with_timestamp(target_abspath):
-        # def convert_img_to_img_blurred(img_abspath):
-        # def convert_img_to_img_cropped(img_abspath, abs_x: int, abs_y: int, width_px: int, height_px: int):
-        # def convert_img_to_img_flipped_horizontally(img_abspath):
-        # def convert_img_to_img_flipped_vertical(img_abspath):
-        # def convert_img_to_img_grey(img_abspath):
-        # def convert_img_to_img_resized(img_abspath, width_px, height_px):
-        # def convert_img_to_img_rotated(img_abspath, degree: int):
-        # def convert_img_to_img_watermarked(img_abspath):
-        # def convert_mp3_to_flac(target_abspath):
-        # def convert_mp4_to_flac(target_abspath):
-        # def convert_mp4_to_wav(target_abspath):
-        # def convert_mp4_to_webm(target_abspath):
-        # def convert_wav_to_flac(target_abspath):
-        # def copy_and_paste_with_keeping_clipboard_current_contents(contents_new):
-        # def copy_label_text_to_clipboard(self):
-        # def countdown_and_click_negative_btn(self):
-        # def countdown_and_click_positive_btn(self):
-        # def create_db_toml():
-        # def data(self, value):
-        # def data(self):
-        # def debug_as_cli(context: str):
-        # def debug_as_gui(context: str, is_app_instance_mode=False, input_text_default=""):
-        # def decode_as_lzw_algorizm(encrypted_text):
-        # def decompress_string(compressed_string):
-        # def delete_db_toml():
-        # def do_once():
-        # def do_random_schedules():
-        # def download_clip_alt(url: str):
-        # def download_clip(url: str):
-        # def download_from_youtube_to_webm_alt(urls_from_prompt):
-        # def download_from_youtube_to_webm(urls_from_prompt):
-        # def download_video_from_web1():
-        # def download_video_from_web1(self):
-        # def download_video_from_web2(self):
-        # def download_youtube_as_wav(self):
-        # def download_youtube_as_webm_only_sound(self):
-        # def empty_recycle_bin():
-        # def encode_as_lzw_algorizm(plaintext: str):
-        # def enter_power_saving_mode():
-        # def enum_windows_callback(hwnd, _):
-        # def eventFilter(self, obj, event):
-        # def excute_macro(self):
-        # def exit_macro(self):
-        # def explorer(file_abspath: str):
-        # def find_direction_via_naver_map(destination: str):
-        # def gather_storages():
-        # def gen_dictionary_for_monitor_target_edited_and_bkup(directory_abspath):
-        # def get_abs_x_and_y_from_img(img_abspath):
-        # def get_added_files(previous_state, current_state):
-        # def get_all_pid_and_process_name():
-        # def get_btn_name_promised(self, button_name_without_shortcut):
-        # def get_btn_name_with_shortcut_name(self, button_name_without_shortcut):
-        # def get_btn(self, btn_name, function, btn_text_align="left"):
-        # def get_btn(self, btn_name, function):
-        # def get_cmd_output(cmd):
-        # def get_column_of_2_dimension_list(list_2_dimension: [], column_no):  # return 은 list 아니고 ndarray 일 수 있다
-        # def get_common_elements(list1, list2):  # 두 개의 리스트를 비교하여 서로 동일한 요소만 새로운 리스트로 출력 # 중복값 색출
-        # def get_comprehensive_weather_information_from_web():
-        # def get_count_args(func):
-        # def get_current_mouse_abs_info():
-        # def get_current_program_pid():
-        # def get_db_toml_key(target_abspath):
-        # def get_deleted_files(previous_state, current_state):
-        # def get_different_elements(list1, list2):  # 두 개의 리스트를 비교하여 서로 다른 요소만 모아서 리스트로 출력
-        # def get_directory_files_mtime_without_files_excepted(directory_abspath):
-        # def get_display_info():
-        # def get_display_setting():
-        # def get_driver_for_selenium():
-        # def get_elements_that_list1_only_have(list1, list2):  # 두 개의 리스트를 비교하여 특정 하나의 리스트 만 가진 요소만 모아서 리스트로 출력
-        # def get_font_for_pyside6(font_path):
-        # def get_font_name_for_mataplot(font_abspath):
-        # def get_infos_of_img_when_img_recognized_succeed(img_abspath, recognize_loop_limit_cnt=0, is_zoom_toogle_mode=False):
-        # def get_length_of_mp3(target_abspath: str):
-        # def get_line_cnt_of_file(target_abspath: str):
-        # def get_list_added_elements_alternatively(list_for_odd, list_for_even):  # from [1, 2, 3] + [ x, y, z] to [1,x,2,y,3,z]
-        # def get_list_each_two_elements_joined(list: []):  # from ["a", "b", "c", "d"] to ["ab", "cd"]
-        # def get_list_replaced_from_list_that_have_special_characters(target: [str], replacement: str):  # from [str] to [str]
-        # def get_list_seperated_by_each_elements_in_nested_list(nested_list):
-        # def get_modified_files(previous_state, current_state):
-        # def get_name_space():  # name space # namespace # 파이썬 네임스페이스
-        # def get_nested_list_converted_from_ndarray(ndarray: numpy.ndarray):  # ndarray 에서 list 로 변환 # ndarray 에서 list 로 변환 # ndarray to nested []  from [[1 2]] to [[1, 2]] # from [ [str str] [str str] ]  to  [ [str, str], [str, str] ]
-        # def get_nested_list_grouped_by_each_two_elements_in_list(list: []):  # from ["a", "b", "c", "d"] to [["a","b"], ["c","d"]]
-        # def get_nested_list_removed_row_that_have_nth_element_dulplicated_by_column_index_for_ndarray(ndarray: [[]], column_index: int):  # 중복된 행 제거하는게 아니고 행의 2번째 요소가 중복되는 것을 제거
-        # def get_nested_list_removed_row_that_have_nth_element_dulplicated_by_column_index(nested_list: [[]], column_index: int):  # 중복된 행 제거하는게 아니고 행의 2번째 요소가 중복되는 것을 제거
-        # def get_nested_list_sorted_by_column_index(nested_list: [[str]], column_index: int, decending_order=False):  # tree depth(sample[1]) 에 대한 내림차순 정렬 # list 2차원 배열의 특정 열의 내림차순 정렬 # from [[str, str]] to [[str, str]]
-        # def get_os_sys_environment_variable(environment_variable_name: str):
-        # def get_process_name_by_pid(pid):
-        # def get_shortcut_name_promised(self, button_name_without_shortcut):
-        # def get_str_replaced_special_characters(target: str, replacement: str):  # str to str
-        # def get_target_bite(start_path='.'):
-        # def get_target_gigabite(target_path):
-        # def get_target_megabite(target_path):
-        # def get_target_pid_by_process_name_legacy(target_process_name: str):
-        # def get_target_pid_by_process_name(target_process_name: str):
-        # def get_time_as_(pattern: str):
-        # def get_tree_depth_level(file_abspath: str):
-        # def get_validated(target: any):
-        # def get_webdriver_options_customed():
-        # def git_push_by_auto():
-        # def inputbox_changed(self):
-        # def inputbox_edit_finished(self):
-        # def inputbox_return_pressed(self):
-        # def insert_db_toml(key, value):
-        # def insert(self, word):
-        # def is_accesable_local_database():
-        # def is_containing_eng(text):
-        # def is_containing_jpn(text):
-        # def is_containing_kor(text):
-        # def is_containing_number(text):
-        # def is_containing_special_characters(text: str):
-        # def is_directory_changed(directory_abspath):
-        # def is_empty_directory(target_abspath):
-        # def is_eng_or_kor_ja(text: str):
-        # def is_file_changed(file_abspath):
-        # def is_file_edited(target_abspath: str):
-        # def is_only_eng_and_kor_and_no_and_speacial_characters(text):
-        # def is_only_eng_and_no_and_speacial_characters(text):
-        # def is_only_eng_and_no(text):
-        # def is_only_eng_and_speacial_characters(text):
-        # def is_only_eng(text):
-        # def is_only_no(text):
-        # def is_only_speacial_characters(text):
-        # def is_regex_in_contents_with_case_ignored(contents, regex):
-        # def is_regex_in_contents(target, regex):
-        # def is_shortcut_pressed_within_10_secs(key_plus_key: str):
-        # def is_two_lists_equal(list1, list2):
-        # def is_validated(target: any):
-        # def is_void_function(func):
-        # def keyDown(key: str):
-        # def keyPressEvent(self, e):
-        # def keyUp(key: str):
-        # def kill_alsong():
-        # def kill_thread(thread_name):
-        # def log_e(log_title="종료로깅"):
-        # def log_mid(log_title="중간로깅"):
-        # def log_s(log_title="시작로깅"):
-        # def login(self):
-        # def make_leaf_directory(leaf_directory_abspath):
-        # def make_leaf_file(leaf_file_abspath):
-        # def make_matrix_console():
-        # def make_park4139_go_to_sleep():
-        # def make_party_console():
-        # def measure_milliseconds_performance(function):
-        # def measure_seconds_performance(function):
-        # def merge_directories(directoryies: str):
-        # def merge_two_directories_without_overwrite(directory_a, directory_b):
-        # def merge_video_and_sound(file_v_abspath, file_a_abspath):
-        # def monitor_mouse_position_per_second(self):
-        # def monitor_mouse_position(self, x, y):
-        # def monitor_target_edited_and_bkup(target_abspath: str):
-        # def mousePressEvent(self, e):
-        # def move_mouse_rel_x(rel_x: int, rel_y: int):
-        # def move_mouse(abs_x: int, abs_y: int):
-        # def move_target_to_trash_bin(target_abspath):
-        # def move_window_to_center(self):
-        # def move_with_overwrite(src: str, dst: str):
-        # def move_without_overwrite(src, dst):
-        # def on_keboard_press(self, key):
-        # def on_keys_down(self, key):
-        # def on_keys_up(self, key):
-        # def on_mouse_btn_clicked(self, x, y, button, pressed):
-        # def on_mouse_move(self, x, y):  # 아주 빠르게 감지
-        # def on_player_eos():
-        # def on_single_key_pressed(self, key):
-        # def open_mouse_info():
-        # def open_project_directory(self):
-        # def parse_youtube_video_id(url):
-        # def pause():
-        # def press(*presses: str, interval=0.0):
-        # def print_and_open_py_pkg_global_path():
-        # def print_list_each_two_elements(list: []):  # print(rf'list[index] list[index+1] : {list[index]} {list[index+1]}') without out of index
-        # def print_python_process_for_killing_zombie_process():
-        # def print_today_time_info():
-        # def process_thread_loop(ment):
-        # def raise_error(str: str):
-        # def read_db_toml():
-        # def reboot_this_computer():
-        # def recommand_console_color():
-        # def remove_special_characters(text):
-        # def rename_target(current_target_abspath, future_target_abspath):
-        # def replace_with_auto_no_orderless(contents: str, unique_word: str, auto_cnt_starting_no=0):
-        # def replace_with_auto_no(contents: str, unique_word: str, auto_cnt_starting_no=0):
-        # def replace_words_based_on_tri_node(text, dictionary):
-        # def return_korean_week_name():
-        # def rotate_window_size_mode(self):
-        # def rpa_program_method_decorator(function: Callable[[T], None]):
-        # def run_async_event_loop(q_application):
-        # def run_async_event_loop(start_index: int, end_index: int, text: str):
-        # def run_async_loop(q_application):
-        # def run_async_loop1():
-        # def run_async_loop2():
-        # def run_async_loop3():
-        # def run_async_loop4():
-        # def run_cmd_exe_as_admin():
-        # def run_cmd_exe_as_admin(self):
-        # def run_console_blurred_as_gui_as_thread(q_application: QApplication):
-        # def run_console_blurred_as_gui(q_application: QApplication):
-        # def run_console_blurred_as_scheduler_as_thread(q_application: QApplication):
-        # def run_console_blurred_as_scheduler(q_application: QApplication):
-        # def run_console_blurred():
-        # def run_loop_for_speak_as_async(ment):
-        # def run_no_paste_memo(self):
-        # def run_targets_promised():
-        # def run_up_and_down_game():
-        # def run(self):
-        # def sanitized_input(user_input: str):
-        # def save_all_list():
-        # def save_macro_log(self, contents: str):
-        # def search_animation_data_from_web(text_of_clicked_btn):
-        # def search(self, word):
-        # def select_db_toml(key):
-        # def set_shortcut(self, btn_name_promised, function):
-        # def set_shortcut(self, key_plus_key: str, function):
-        # def shoot_custom_screenshot():
-        # def shoot_full_screenshot():
-        # def shoot_img_for_rpa():
-        # def shoot_screenshot_custom(self):
-        # def shoot_screenshot_for_rpa(self):
-        # def shoot_screenshot_full(self):
-        # def should_i_back_up_target():
-        # def should_i_back_up_target(self):
-        # def should_i_check_your_routine_before_coding():
-        # def should_i_classify_special_files():
-        # def should_i_connect_to_rdp1():
-        # def should_i_connect_to_rdp1(self):
-        # def should_i_download_youtube_as_webm_alt():
-        # def should_i_download_youtube_as_webm_alt(self):
-        # def should_i_download_youtube_as_webm():
-        # def should_i_download_youtube_as_webm(self):
-        # def should_i_empty_trash_can():
-        # def should_i_empty_trash_can(self):
-        # def should_i_enter_to_power_saving_mode():
-        # def should_i_enter_to_power_saving_mode(self):
-        # def should_i_exit_this_program():
-        # def should_i_exit_this_program(self):
-        # def should_i_find_direction_via_naver_map():
-        # def should_i_find_direction_via_naver_map(self):
-        # def should_i_gather_empty_directory():
-        # def should_i_gather_special_files():
-        # def should_i_gather_useless_files():
-        # def should_i_merge_directories():
-        # def should_i_reboot_this_computer():
-        # def should_i_reboot_this_computer(self):
-        # def should_i_record_macro():
-        # def should_i_record_macro(self):
-        # def should_i_run_targets_promised():
-        # def should_i_show_animation_information_from_web():
-        # def should_i_show_animation_information_from_web(self):
-        # def should_i_shutdown_this_computer():
-        # def should_i_shutdown_this_computer(self):
-        # def should_i_speak_today_time_info():
-        # def should_i_start_test_core():
-        # def should_i_start_test(self):
-        # def should_i_taskkill_useless_programs():
-        # def should_i_translate_eng_to_kor():
-        # def should_i_translate_eng_to_kor(self):
-        # def should_i_translate_kor_to_eng():
-        # def should_i_translate_kor_to_eng(self):
-        # def show_weather_from_web(self):
-        # def shutdown_this_computer():
-        # def sleep(milliseconds):
-        # def speak_after_x_min(mins: int):
-        # def speak_alt_for_emergency(contents: str):
-        # def speak_server_hh_mm():  # '몇 시야' or usr_input_txt == '몇시야':
-        # def speak_server_ss():
-        # def speak_that_service_is_in_preparing():
-        # def speak_today_time_info():
-        # def speak_without_async(ment):  # 많이 쓸 수록 프로그램이 느려진다
-        # def speak(ment):
-        # def stop_all_sounds():
-        # def taskkill_useless_programs():
-        # def taskkill(program_img_name):
-        # def tmp(string: str):
-        # def tmp2(q_application: QApplication):
-        # def toogle_console_color(color_bg, colors_texts):
-        # def toogle_rpa_window(self):
-        # def translate_eng_to_kor_deprecated(request: str):
-        # def translate_eng_to_kor(question: str):
-        # def translate_kor_to_eng_deprecated(request: str):
-        # def translate_kor_to_eng(question: str):
-        # def trouble_shoot(trouble_id: str):
-        # def update_db_toml(key, value):
-        # def update_global_pkg_park4139_for_linux():
-        # def update_label(self):
-        # def update_os_sys_environment_variable(environment_variable_name: str, new_path: str):
-        # def update_text_of_clicked_btn_and_close(self, text_of_clicked_button):
-        # def update_text_of_clicked_btn(self, text_of_clicked_button):
-        # def what_does_this_consist_of(text: str):
-        # def write_fast(presses: str):
-        # def write_slow(presses: str):
-        # def xcopy_with_overwrite(target_abspath_from, future_target_abspath):
-        #
-        #
-        #
-        # 진행완료팝업,
-        #     TIMER 기능
-        #     개발배경 : 음악 듣거나, 애니볼때, 말로 하는게 시끄러워서
-        #
-
         # 파일변경감지 아이디어
         # (이것 git으로 할 수 있잖아!)
         # 감지이벤트를 걸어 파일변경감지 시 비동기 빽업처리... 아 git 설치 안되있으면 안됨.
-
-        # 파일 동기화 모듈로 로컬 1차 백업
-
-        # 파일분류 기능
-        # 이름에 [subplease] 가 있다면 [subplease] 디렉토리를 만들어 그곳으로 move_without_overwrite
 
         # 파일명 대체 기능 (불필요한 접두/어근/접미, 삭제/추가)
         # 이름에 [subplease] 가 있다면
@@ -1364,6 +999,7 @@ def test_sprint_core():
         # 빈폴더 머지는 확실히 삭제해도 되는 빈폴더를 한 폴더에 두고 빈폴더 삭제 명령어로 처리하자
 
         # def prisonize_storage():
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
 
         # 나중에 TDD 공부를 해볼 것.
         # 파일 변화 확인 로직 필요.
@@ -1392,6 +1028,7 @@ def test_sprint_core():
         # 지켜진 부분
         # - 클래스명 : class RpaProgramWindow(QWindow):
         # - 함수, 메소드명 : def love_you():
+        DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         # - import 중 이름충돌 예상 시 as 사용 : 충돌의 소지가 있을 때 as 를 썻다. PEP8을 알고 지킨건 아니고 jetbrain IDE 의 가이드기능을 잘 따르다 보니, 잘 지켜졌다. : import blahblah as blah
 
         # 국내주식과 미국주식을 크롤링해서 보고 싶어졌다.
@@ -1399,8 +1036,8 @@ def test_sprint_core():
         # 데이터수집장소 : 다양한 웹사이트에서 크롤링하여 데이터를 수집하기로 생각하였다, 신뢰도가 높아보이는 데이터를 수집해야 한다
         # 데이터신뢰도판단 : 네이버 금융정보 데이터신뢰도가 높다고 판단한 이유는 타블로그에서 정보를 얻었으며, 여러 이유 중 가장 큰 이유는 네이버의 공인력을 내가 믿기때문이다.)
         # 데이터수집방식 : 특정데이터는 네이버에서 직접 크롤링할 것. 웹 크롤링도 약간 늘었고, 데이터를 엑셀의 형태로 핸들링 하기 위해서 pandas 배워야 겠다. 잠깐만 기다려라 배워서 다시 오겠다.
-        # import pykrx # 국내증권데이터 공유 라이브러리,               네이버금융사이트(실시간수정되는 주식데이터),               한국증권사이트 의 데이터 기반, 고신뢰성데이터 인 국내주식정보 를 볼 수 있다.  pykrx의 특징은 국내 주식만 수집이 가능한대신 yfinance보다 국내주식 시세가 정확하고 PER, PBR, 배당수익률과 같은 지표는 신뢰성이 떨어진다 - 출처: https://bigdata-doctrine.tistory.com/7 [경제와 데이터:티스토리]
-        # import yfinance # 증권데이터 공유 라이브러리,              야후 파이낸스에서 크롤링한 데이터를 제공하는 라이브러리, 미국주식데이터 는 상대적으로 정확 , 국내주식데이터 의 잦은누락,   결론은 다른게 나아보인다.
+        # import pykrx # 국내증권데이터 공유 라이브러리, 네이버금융사이트(실시간수정되는 주식데이터), 한국증권사이트 의 데이터 기반, 고신뢰성데이터 인 국내주식정보 를 볼 수 있다.  pykrx의 특징은 국내 주식만 수집이 가능한대신 yfinance보다 국내주식 시세가 정확하고 PER, PBR, 배당수익률과 같은 지표는 신뢰성이 떨어진다 - 출처: https://bigdata-doctrine.tistory.com/7 [경제와 데이터:티스토리]
+        # import yfinance # 증권데이터 공유 라이브러리, 야후 파이낸스에서 크롤링한 데이터를 제공하는 라이브러리, 미국주식데이터 는 상대적으로 정확 , 국내주식데이터 의 잦은누락,   결론은 다른게 나아보인다.
 
         # 나의 가치는 "있어 보이는 척 말고 해본 것" 에서 온다고 믿는다.
         # 그만큼 해보려면 시간을 쏟아 부어야 한다는 주변의 어느 개발자의 말씀도 있었다
@@ -1450,33 +1087,1170 @@ def test_sprint_core():
         TestUtil.pause()
 
 
-content = r"""
+@TestUtil.measure_seconds_performance_nth
+def crawl_finance_data_via_fdr():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    # __________________________________________________________________________________________________________________________________
+    # import plotly.express as px
+    # pip install kaleido
+    import FinanceDataReader as fdr  # 주가 변화에 대한 실시간 데이터를 제공하지 않음, 나는 주가 변화에 대한 고빈도 실시간 데이터를 원하므로 다른 대안 필요.
+
+    # 거래소상장주식코드목록 via StockListing()
+    # df = fdr.StockListing(market='SSE')  # 상해
+    # df = fdr.StockListing(market='SZSE')
+    # df = fdr.StockListing(market='KRX-DESC') # fail
+    df = fdr.StockListing(market='KRX')  # 대한민국 거래소 , KOSPI+KOSDAQ+KONEX
+    # df = fdr.StockListing(market='KOSPI')
+    # df = fdr.StockListing(market='NYSE')  # 뉴욕거래소 # 뉴욕주식거래소  # 뉴욕 스탁 익스체인지
+    # df = fdr.StockListing(market='S&P500')
+    # df = fdr.StockListing(market='NASDAQ')
+    # 데이터 클렌징
+    # df  = df[df["Name"] == "삼성전자"] # success
+    # df  = df[df["Name"].str.contains("삼성전자")] # success
+    df = df[df["ChangeCode"] == "1"]  # success, 오늘 양봉,
+    # df = df[df["ChangeCode"] == "2"]  # success, 오늘 음봉
+    df = df[3 <= df["ChagesRatio"]]  # success, 오늘 3프로 이상 간 것
+    DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼명 제어
+    # df = df[['Name', 'Code', 'ChagesRatio']]  # 컬럼들 제어
+    # df = df[['Code', 'ISU_CD', 'Name', 'Market', 'Dept', 'Close', 'ChangeCode','Changes', 'ChagesRatio', 'Open', 'High', 'Low', 'Volume', 'Amount','Marcap', 'Stocks', 'MarketId']]
+    df = df[['Code', 'Name', 'Market', 'ChangeCode', 'ChagesRatio', 'Open', 'High', 'Low', 'Close', 'Volume', 'Amount', 'Stocks', 'Marcap']]
+    # df  = df[df["Name"].str.contains("삼성전자|하이닉스")] # success
+    # df = df[df["Name"].str.contains("삼성") & df["Name"].str.contains("전자")]
+    # df = df.head(1)  # 레코드들 개수 제어
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    df = df.sort_values('ChagesRatio', ascending=False)  # 레코드들 순번 제어
+    # df = df.sort_values('Stocks', ascending=False) # 'Stocks': 주식의 총 개수. 발행된 주식의 총 개수. 총 상장 주식수는 해당 종목의 주식이 시장에 총 몇 주가 상장되어 있는지를 나타내며, 기업의 규모와 주식 시장에서의 유동성을 판단하는데 사용됩니다.
+    # df = df.sort_values('Marcap', ascending=False) # 'Marcap': 시가총액(Market Capitalization), Marcap = stocks * 주가(close), 해당 종목의 모든 주식이 현재 시장에서 평가받는 총 가치를 의미합니다. 시가총액은 주식 시장에서 기업의 크기와 가치를 판단하는 지표.
+    # df = df.sort_values('Volume', ascending=False) # 'Volume': 당일의 주식의 총수 변화량, 매수총수 + 매도총수, 활발한 거래를 나타내는 지표
+    # df = df.sort_values('Amount', ascending=False) # 'Amount': 당일의 주식의 거래량 Amount = Volume * 주가(Close), 활발한 거래를 나타내는 지표
+    DebuggingUtil.print_magenta(rf'''df : {df}''')
+    DebuggingUtil.print_magenta(rf'''len(df) : {len(df)}''')
+
+    fig = ff.create_table(df)
+    fig.show()
 
 
-처리할 코드는 여기에 작성
+# @TestUtil.measure_seconds_performance_nth
+def update_ticker_xlsx():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    # __________________________________________________________________________________________________________________________________
+    # import FinanceDataReader as fdr
+    # import pandas as pd
+    # import plotly.express as px
+    # # pip install kaleido
+    # from PySide6.QtCore import QCoreApplication
+    # from PySide6.QtWidgets import QApplication
+    import FinanceDataReader as fdr  # 주가 변화에 대한 실시간 데이터를 제공하지 않음, 나는 주가 변화에 대한 고빈도 실시간 데이터를 원하므로 다른 대안 필요.
+    import pandas as pd
+
+    # 데이터 업데이트 주기가 매 프로그램 시작마다인 데이터 처리(stock ticker or stock id , stock name)
+    # 데이터 업데이트가 하루 주기여도 되는 데이터만 선정, 데이터 업데이트 주기가 매 프로그램 시작마다인 현재 방식을 DB 에 데이터를 넣어 불러오는 방식으로, 데이터 업데이트 주기를 한달 주기로 변경 예정.
+    # __________________________________________________________________________________________________________________________________
+    # 한국주식
+    # df_krx에 저장
+    # 거래소상장주식코드목록 via StockListing()
+    market = 'KRX'  # 대한민국 거래소 , KOSPI+KOSDAQ+KONEX
+    # market='KOSDAQ'
+    # market='KOSPI'
+    # market='KONEX' # 코넥스
+    DebuggingUtil.print_magenta(f'market : {market}')
+    df = pd.DataFrame()
+    try:
+        df = fdr.StockListing(market=market)
+    except Exception:
+        print("다운로드가 멈췄음")
+    # DebuggingUtil.print_magenta(f'df : \n{df}')
+    # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    # 데이터 클렌징
+    # DebuggingUtil.print_ment_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼들 제어
+    # df  = df[df["Name"].str.contains("삼성전자|하이닉스")]
+    # df = df[df["Name"].str.contains("삼성") & df["Name"].str.contains("전자")]
+    # df  = df[df["Name"] == "삼성전자"]
+    # df  = df[df["Name"].str.contains("삼성전자")]
+    # df = df[df["ChangeCode"] == "1"]  # 오늘 양봉,
+    # df = df[df["ChangeCode"] == "2"]  # 오늘 음봉
+    # df = df[3 <= df["ChagesRatio"]]  # 오늘 3프로 이상 간 것
+    df = df.sort_values('Code', ascending=False)  # 레코드들 순번 제어
+    df = df[['Code', 'Name', 'Market']]
+    # df = df.head(1)
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    # df = df.sort_values('Stocks', ascending=False) # 'Stocks': 주식의 총 개수. 발행된 주식의 총 개수. 총 상장 주식수는 해당 종목의 주식이 시장에 총 몇 주가 상장되어 있는지를 나타내며, 기업의 규모와 주식 시장에서의 유동성을 판단하는데 사용됩니다.
+    # df = df.sort_values('Marcap', ascending=False) # 'Marcap': 시가총액(Market Capitalization), Marcap = stocks * 주가(close), 해당 종목의 모든 주식이 현재 시장에서 평가받는 총 가치를 의미합니다. 시가총액은 주식 시장에서 기업의 크기와 가치를 판단하는 지표.
+    # df = df.sort_values('Volume', ascending=False) # 'Volume': 당일의 주식의 총수 변화량, 매수총수 + 매도총수, 활발한 거래를 나타내는 지표
+    # df = df.sort_values('Amount', ascending=False) # 'Amount': 당일의 주식의 거래량 Amount = Volume * 주가(Close), 활발한 거래를 나타내는 지표
+    df_krx = df
+    # DebuggingUtil.print_ment_magenta(rf'''df_krx : {df_krx}''')
+    DebuggingUtil.print_magenta(rf'''len(df_krx) : {len(df_krx)}''')
+    # fig = ff.create_table(df_krx)
+    # fig.show()
+    # __________________________________________________________________________________________________________________________________
+    # 미국주식
+    # df_usa에 저장
+    # market='NYSE'  # 뉴욕거래소
+    # market='S&P500'
+    market = 'NASDAQ'
+    DebuggingUtil.print_magenta(f'market : {market}')
+    try:
+        df = fdr.StockListing(market=market)
+    except Exception:
+        print("다운로드가 멈췄음")
+    # 데이터 클렌징
+    # DebuggingUtil.print_ment_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼들 제어
+    # df = df[['Symbol', 'Name', 'IndustryCode', 'Industry']]
+    # df  = df[~df["IndustryCode"].str.contains("63101010|63102010")] # ~ 연산자로 제외할 수 있다.
+    # df  = df[df["Name"] == "NVDA"]
+    # df  = df[df["Name"].str.contains("NVDA|AAPL|META|AMZN")]
+    df = df.sort_values('IndustryCode', ascending=True)  # NASDAQ Industry 분류 순으로 정렬, 테마별로 보는데 유용할 것으로 기대
+    df = df[['Symbol', 'Name']]
+    # df = df.head(1)
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    df_usa = df
+    # DebuggingUtil.print_ment_magenta(rf'''df_usa : {df_usa}''')
+    DebuggingUtil.print_magenta(rf'''len(df_usa) : {len(df_usa)}''')
+    # fig = ff.create_table(df_usa)
+    # fig.show()
+    # __________________________________________________________________________________________________________________________________
+    # 미국ETF
+    market = 'ETF/US'
+    DebuggingUtil.print_magenta(f'market : {market}')
+    df = None
+    try:
+        df = fdr.StockListing(market=market)
+    except Exception:
+        print("다운로드가 멈췄음")
+    # 데이터 클렌징
+    # DebuggingUtil.print_ment_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼들 제어
+    # df = df[['Symbol', 'Name', 'IndustryCode', 'Industry']]
+    # df  = df[df["Symbol"] == "TQQQ"]
+    # df = df[~df["Symbol"].str.contains("IWM|LQD")]  # ~ 연산자, 비관심종목 제외 설정에 유용, 짧은 심볼을 작성 시 긴 심볼도 삭제될 수 있으니 유의해야함.
+    # df  = df[df["Symbol"].str.contains("TQQQ|QQQ|META|AMZN")] # 관심종목 설정에 유용
+    # df = df.sort_values('IndustryCode', ascending=True)  # NASDAQ Industry 분류 순으로 정렬, 테마별로 보는데 유용할 것으로 기대
+    df = df[['Symbol', 'Name']]
+    # df = df.head(1)
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    df_usa_etf = df
+    # DebuggingUtil.print_magenta(f'''df_usa_etf : \n{df_usa_etf}''')
+    DebuggingUtil.print_magenta(rf'''len(df_usa_etf) : {len(df_usa_etf)}''')
+    df_krx = df_krx.rename(columns={"Code": "ticker", "Name": "stock_name", "Market": "market_name"})  # df 헤더명 제어
+    df_usa = df_usa.rename(columns={"Symbol": "ticker", "Name": "stock_name"})
+    df2 = pd.DataFrame()  # df2 에 빈 df 저장
+    df2['Market'] = ['NASDAQ'] * len(df_usa)  # df2의 'Market' 열에 len(df_usa)개 만큼의 데이터가 'NASDAQ'인 레코드 저장
+    df_usa = pd.concat([df_usa, df2], ignore_index=True, axis=1)  # df 가로병합 # 두 데이터프레임 병합
+    df_usa.columns = ["ticker", "stock_name", "market_name"]  # df_usa 에 컬럼명 설정
+    df_usa_etf = df_usa_etf.rename(columns={"Symbol": "ticker", "Name": "stock_name"})
+    df3 = pd.DataFrame()
+    df3['Market'] = ['US/ETF'] * len(df_usa_etf)
+    df_usa_etf = pd.concat([df_usa_etf, df3], ignore_index=True, axis=1)  # df 가로병합 # 두 데이터프레임 병합
+    df_usa_etf.columns = ["ticker", "stock_name", "market_name"]  # df_usa 에 컬럼명 설정
+    df_concated = pd.concat([df_krx, df_usa, df_usa_etf], ignore_index=True)  # df 세로병합 # 두 데이터프레임 병합
+
+    # function().xlsx 에 저장
+    FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    FileSystemUtil.make_leaf_file(FILE_XLSX)
+    df_concated.to_excel(FILE_XLSX)
+
+    # df_fig.x 에 저장
+    # fig.write_image("df_fig.png")
+    # fig.write_image("df_fig.jpeg")
+    # fig.write_image("df_fig.svg")
+    # fig.write_image("df_fig.webp")
+    # fig.write_image("df_fig.pdf")
+    # fig.write_html("df_fig.html")
+
+    # df 에 저장
+    # FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    # DebuggingUtil.print_magenta(rf'''FILE_XLSX : {FILE_XLSX}''')
+    # df_xlsx = pd.read_excel(FILE_XLSX)
+    # DebuggingUtil.print_magenta(f'df_xlsx : \n{df_xlsx}')
+    # DebuggingUtil.print_magenta(rf'type(df_xlsx) : {type(df_xlsx)}')
+    # DebuggingUtil.print_magenta(rf'len(df_xlsx) : {len(df_xlsx)}')
+    # df = pd.read_csv(rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_recycle_bin\test.xlsx")
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_html(FILE_HTML)
+
+    # fig 에 저장
+    # fig = ff.create_table(df)
+    # fig.show()
 
 
-"""
+@TestUtil.measure_seconds_performance_nth
+def update_db_finance_stock_ticker():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    # __________________________________________________________________________________________________________________________________
+    # import FinanceDataReader as fdr
+    # import pandas as pd
+    # import plotly.express as px
+    # # pip install kaleido
+    # from PySide6.QtCore import QCoreApplication
+    # from PySide6.QtWidgets import QApplication
+    import FinanceDataReader as fdr  # 주가 변화에 대한 실시간 데이터를 제공하지 않음, 나는 주가 변화에 대한 고빈도 실시간 데이터를 원하므로 다른 대안 필요.
+
+    # 데이터 업데이트 주기가 매 프로그램 시작마다인 데이터 처리(stock ticker or stock id , stock name)
+    # 데이터 업데이트가 하루 주기여도 되는 데이터만 선정, 데이터 업데이트 주기가 매 프로그램 시작마다인 현재 방식을 DB 에 데이터를 넣어 불러오는 방식으로, 데이터 업데이트 주기를 한달 주기로 변경 예정.
+    # 한국주식
+    # df_krx에 저장
+    # 거래소상장주식코드목록 via StockListing()
+    market = 'KRX'  # 대한민국 거래소 , KOSPI+KOSDAQ+KONEX
+    # market='KOSDAQ'
+    # market='KOSPI'
+    # market='KONEX' # 코넥스
+    df = fdr.StockListing(market=market)
+    # 레코드들 필터링
+    # DebuggingUtil.print_ment_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼들 제어
+    # df  = df[df["Name"].str.contains("삼성전자|하이닉스")]
+    # df = df[df["Name"].str.contains("삼성") & df["Name"].str.contains("전자")]
+    # df  = df[df["Name"] == "삼성전자"]
+    # df  = df[df["Name"].str.contains("삼성전자")]
+    # df = df[df["ChangeCode"] == "1"]  # 오늘 양봉,
+    # df = df[df["ChangeCode"] == "2"]  # 오늘 음봉
+    # df = df[3 <= df["ChagesRatio"]]  # 오늘 3프로 이상 간 것
+    df = df.sort_values('Code', ascending=False)  # 레코드들 순번 제어
+    df = df[['Code', 'Name', 'Market']]
+    # df = df.head(1)
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    # df = df.sort_values('Stocks', ascending=False) # 'Stocks': 주식의 총 개수. 발행된 주식의 총 개수. 총 상장 주식수는 해당 종목의 주식이 시장에 총 몇 주가 상장되어 있는지를 나타내며, 기업의 규모와 주식 시장에서의 유동성을 판단하는데 사용됩니다.
+    # df = df.sort_values('Marcap', ascending=False) # 'Marcap': 시가총액(Market Capitalization), Marcap = stocks * 주가(close), 해당 종목의 모든 주식이 현재 시장에서 평가받는 총 가치를 의미합니다. 시가총액은 주식 시장에서 기업의 크기와 가치를 판단하는 지표.
+    # df = df.sort_values('Volume', ascending=False) # 'Volume': 당일의 주식의 총수 변화량, 매수총수 + 매도총수, 활발한 거래를 나타내는 지표
+    # df = df.sort_values('Amount', ascending=False) # 'Amount': 당일의 주식의 거래량 Amount = Volume * 주가(Close), 활발한 거래를 나타내는 지표
+    df_krx = df
+    # DebuggingUtil.print_ment_magenta(rf'''df_krx : {df_krx}''')
+    DebuggingUtil.print_magenta(rf'''len(df_krx) : {len(df_krx)}''')
+    # fig = ff.create_table(df_krx)
+    # fig.show()
+
+    # 미국주식
+    # df_usa에 저장
+    # market='NYSE'  # 뉴욕거래소
+    # market='S&P500'
+    market = 'NASDAQ'
+    df = fdr.StockListing(market=market)
+    # 레코드들 필터링
+    # DebuggingUtil.print_ment_magenta(rf'''df.columns : {df.columns}''')  # 헤더 컬럼들 제어
+    # df = df[['Symbol', 'Name', 'IndustryCode', 'Industry']]
+    # df  = df[df["Name"].str.contains("NVDA|AAPL|META|AMZN")]
+    # df  = df[~df["IndustryCode"].str.contains("63101010|63102010")] # ~ 연산자로 제외할 수 있다.
+    # df  = df[df["Name"] == "NVDA"]
+    # df  = df[df["Name"].str.contains("NVDA")]
+    df = df.sort_values('IndustryCode', ascending=True)  # NASDAQ Industry 분류 순으로 정렬, 테마별로 보는데 유용할 것으로 기대
+    df = df[['Symbol', 'Name']]
+    # df = df.head(1)
+    # df = df.head(10)
+    # df = df.head(20)
+    # df = df.head(100)
+    df_usa = df
+    # DebuggingUtil.print_ment_magenta(rf'''df_usa : {df_usa}''')
+    DebuggingUtil.print_magenta(rf'''len(df_usa) : {len(df_usa)}''')
+    # fig = ff.create_table(df_usa)
+    # fig.show()
+
+    # count_ticker_current 에 저장
+    count_ticker_current = len(df_krx) + len(df_usa)
+    DebuggingUtil.print_magenta(rf'''count_ticker_current : {count_ticker_current}''')
+
+    # count_ticker_previous 에 저장
+    df2 = MySqlUtil.execute(f'''select COUNT(*) FROM finance_stock_ticker;''')
+    # DebuggingUtil.print_ment_magenta(rf'''df2 : {df2}''')
+    df2 = df2['COUNT(*)']
+    count_ticker_previous = df2.item()
+    DebuggingUtil.print_magenta(rf'''count_ticker_previous : {count_ticker_previous}''')
+
+    # ticker 수에 변화가 있으면 finance_stock_ticker(DB 내의 ticker 목록) 업데이트
+    if count_ticker_previous != count_ticker_current:
+
+        # finance_stock_ticker 비우기
+        MySqlUtil.execute(f'truncate table finance_stock_ticker;')
+
+        # finance_stock_ticker 에 저장
+        cnt_usa = 0
+        for index, row in df.iterrows():
+            dict_data = {
+                'ticker': row['Symbol'],
+                'stock_name': row['Name'],
+                'market_name': market,
+            }
+            FinanceStockTickerUtil.insert_finance_stock_ticker(finance_stock_ticker=dict_data, db=MySqlUtil.get_session_local())
+            cnt_usa += 1
+            # DebuggingUtil.print_ment_magenta(rf'''cnt_usa : {cnt_usa}  dict_data : {dict_data}''')
+        DebuggingUtil.print_magenta(rf'''cnt_usa : {cnt_usa}''')
+
+        # finance_stock_ticker 에 저장
+        cnt_kra = 0
+        for index, row in df_krx.iterrows():
+            dict_data = {
+                'ticker': row['Code'],
+                'stock_name': row['Name'],
+                'market_name': row['Market'],
+            }
+            FinanceStockTickerUtil.insert_finance_stock_ticker(finance_stock_ticker=dict_data, db=MySqlUtil.get_session_local())
+            cnt_kra += 1
+            # DebuggingUtil.print_ment_magenta(rf'''cnt_kra : {cnt_kra}  dict_data : {dict_data}''')
+        DebuggingUtil.print_magenta(rf'''cnt_kra : {cnt_kra}''')
+
+
+@TestUtil.measure_seconds_performance_nth
+def update_db_stock_info_via_naver_pay_finance():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    '''네이버페이증권 전종목 주식정보'''
+    try:
+        from datetime import date
+        from dateutil.relativedelta import relativedelta
+        import requests as rq
+
+        # ticker 에 저장
+        tickers = []
+        df = pd.read_excel(StateManagementUtil.FILE_DF_TICKER_XLSX)
+        # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')
+        df = df[['ticker', 'stock_name']]
+        # DebuggingUtil.print_magenta(rf'''df : {df}''')
+        tickers = df['ticker'].tolist()  # 특정열 제어 #특정열만 list 로 추출
+        # DebuggingUtil.print_magenta(rf'''ticker : {ticker}''')
+
+        # start_time/end_time 에 저장
+        # start_time = (date.today() + relativedelta(years=-5)).strftime("%Y%m%d")
+        # start_time = (date.today() + relativedelta(days=-1)).strftime("%Y%m%d") # days 로 하면 크롤링 막힘
+        start_time = (date.today() + relativedelta(years=-1)).strftime("%Y%m%d")
+        end_time = (date.today()).strftime("%Y%m%d")
+
+        # stock_info 비우기
+        MySqlUtil.execute(f'truncate table stock_info;')  # success
+
+        # DB에 저장
+        for ticker in tickers:
+            # get request
+            # url = f'''https://fchart.stock.naver.com/siseJson.nhn?symbol={ticker}&requestType=1&startTime={start_time}&endTime={end_time}&timeframe=day''', 처음에 됬는데 안됨
+            url = f'''https://m.stock.naver.com/front-api/v1/external/chart/domestic/info?symbol={ticker}&requestType=1&startTime={start_time}&endTime={end_time}&timeframe=day'''  # 보통주
+            DebuggingUtil.print_magenta(rf'''url : {url}''')
+            response = rq.get(url)
+            if response.status_code == 200:
+                data_bytes = response.content
+                # DebuggingUtil.print_magenta(rf'''data_bytes : {data_bytes}''')
+                df = pd.read_csv(BytesIO(data_bytes))  # caution, timedelta 를 days -1 으로 하면 데이터 크롤링 막힘
+                # df = pd.read_csv(BytesIO(data_bytes), encoding='euc-kr') # success
+                # df = pd.read_csv(BytesIO(data_bytes), encoding='cp949') # success, cp949 가 euc-kr 보다 범용적
+                # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')  # 헤더 제어, before
+                df = df.iloc[:, 0:6]  # 0 에서 6 까지 컬럼 제어
+                # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')  # 헤더 제어, after
+                df.columns = ['날짜', '시가', '고가', '저가', '종가', '거래량']  # 컬럼 제어, 컬럼헤더가 데이터가 [[]] 이런식으로 이상했기에 재정의
+                df = df.dropna()  # NaN 값을 포함하는 모든 행을 삭제
+                df['날짜'] = df['날짜'].str.extract(r'(\d+)')  # "321" 321, 정규식으로 숫자추출
+                df['날짜'] = pd.to_datetime(df['날짜'])
+                df['종목코드'] = ticker  # 컬럼추가
+                # DebuggingUtil.print_magenta(rf'''df : {df}''')
+                ticker_updated = []
+                for index, df_row in df.iterrows():
+                    dict_data = {
+                        'date': df_row['날짜'],
+                        'open': df_row['시가'],
+                        'high': df_row['고가'],
+                        'low': df_row['저가'],
+                        'close': df_row['종가'],
+                        'volume': df_row['거래량'],
+                        'ticker': df_row['종목코드'],
+                    }
+                    StockInfoUtil.insert_stock_info(stock_info=dict_data, db=MySqlUtil.get_session_local())
+                    ticker_updated.append(df_row['종목코드'])
+                # [DebuggingUtil.print_magenta(sample) for sample in ticker_updated ]
+                # DebuggingUtil.print_magenta(rf'len(ticker_updated) : {len(ticker_updated)}')
+            else:
+                DebuggingUtil.print_ment_fail(f'url: {url} 요청이 실패')
+
+            # 네이버 증권 크롤링 방어책 회피 시도
+            BusinessLogicUtil.sleep(milliseconds=random.randint(5000, 10000), print_mode=False)
+    except UnicodeDecodeError:
+        traceback.print_exc(file=sys.stdout)
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+
+
+@TestUtil.measure_seconds_performance_nth
+def crawl_stock_info_via_naver_pay_finance(search_word: str):
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    '''네이버페이증권 특정종목 주식정보'''
+
+    from io import StringIO
+    import pandas as pd
+    from bs4 import BeautifulSoup
+    driver = None
+    try:
+        # 검색
+        # search_word = "삼성"
+        # search_word = "삼성전자"
+        # search_word = "삼성전자우"
+
+        data_list = FinanceStockTickerUtil.get_finance_stock_tickers(db=MySqlUtil.get_session_local())
+        # DebuggingUtil.print_magenta(rf'data_list : {data_list}')
+        # DebuggingUtil.print_magenta(rf'type(data_list) : {type(data_list)}')
+        # DebuggingUtil.print_magenta(rf'len(data_list) : {len(data_list)}')
+        if len(data_list) == 0:
+            update_db_finance_stock_ticker()
+
+        # df = pd.DataFrame(data_list)
+        # DebuggingUtil.print_magenta(rf'df : {df}')
+        # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+        # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+
+        df = BusinessLogicUtil.get_ticker_by_search(stock_name=search_word)
+        df = df[['ticker', 'stock_name']]
+        DebuggingUtil.print_magenta(rf'df : {df}')
+        DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+        DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+        data_list = df['ticker'].tolist()
+        tickers = data_list
+
+        df_concated = pd.DataFrame()
+        for ticker in tickers:
+            # ticker = '068270'
+            df = BusinessLogicUtil.get_stock_name(ticker)
+            df = df[['stock_name']]
+            data_list = df['stock_name'].tolist()
+            # DebuggingUtil.print_magenta(rf'data_list : {data_list}')
+            # DebuggingUtil.print_magenta(rf'type(data_list) : {type(data_list)}')
+            # DebuggingUtil.print_magenta(rf'len(data_list) : {len(data_list)}')
+            stock_name = data_list[0]
+            # DebuggingUtil.print_ment_light_white(f'''{stock_name} 주식가격 정보 웹크롤링''')
+
+            # selenium way
+            driver = SeleniumUtil.get_driver_for_selenium()
+            target_url = f'https://finance.naver.com/item/sise_day.nhn?code={ticker}&page=1'
+            DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+            driver.get(target_url)
+            html = driver.page_source
+            # DebuggingUtil.print_magenta(rf'''html : {html}''')
+            soup = BeautifulSoup(html, "lxml")
+            # DebuggingUtil.print_magenta(rf'soup : {soup}')
+            # DebuggingUtil.print_magenta(rf'type(soup) : {type(soup)}')
+            # DebuggingUtil.print_magenta(rf'len(soup) : {len(soup)}')
+            table = soup.select("table")
+            # DebuggingUtil.print_magenta(rf'table : {table}')
+            # DebuggingUtil.print_magenta(rf'type(table) : {type(table)}')
+            # DebuggingUtil.print_magenta(rf'len(table) : {len(table)}')
+            data_str = str(table[0])
+            data_string_io = StringIO(data_str)
+            data_list = pd.read_html(data_string_io)
+            # DebuggingUtil.print_magenta(rf'data_list[0] : {data_list[0]}')
+            # DebuggingUtil.print_magenta(rf'type(data_list[0]) : {type(data_list[0])}')
+            # DebuggingUtil.print_magenta(rf'len(data_list[0]) : {len(data_list[0])}')
+            df = data_list[0]
+            # DebuggingUtil.print_magenta(rf'df : {df}')
+            # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+            # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+            df = df.dropna()  # NaN 값을 포함하는 모든 행을 삭제
+            # DebuggingUtil.print_magenta(rf'df : {df}')
+            # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+            # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+            # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')
+            # DebuggingUtil.print_magenta(rf'type(df.columns) : {type(df.columns)}')
+            # DebuggingUtil.print_magenta(rf'len(df.columns) : {len(df.columns)}')
+            df.columns = ['날짜', '종가', '전일비', '시가', '고가', '저가', '거래량']
+            # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')
+            # DebuggingUtil.print_magenta(rf'type(df.columns) : {type(df.columns)}')
+            # DebuggingUtil.print_magenta(rf'len(df.columns) : {len(df.columns)}')
+            df = df[['날짜', '시가', '고가', '저가', '종가', '거래량']]
+            df = df.head(3)
+            df['주식명'] = stock_name
+            # DebuggingUtil.print_magenta(rf'df : {df}')
+            # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+            # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+            df_concated = pd.concat([df_concated, df], ignore_index=True, axis=0)  # df 병합 # 두 데이터프레임 병합, 0 수직병합(기본값) 1 수평병합
+
+        DebuggingUtil.print_magenta(f'df_concated : \n{df_concated}')
+        DebuggingUtil.print_magenta(rf'type(df_concated) : {type(df_concated)}')
+        DebuggingUtil.print_magenta(rf'len(df_concated) : {len(df_concated)}')
+
+        # 통계
+        df_describe = df_concated.groupby('주식명')['종가'].describe()
+        # DebuggingUtil.print_magenta(f'df_describe : \n{df_describe}')
+        # DebuggingUtil.print_magenta(rf'type(df_describe) : {type(df_describe)}')
+        # DebuggingUtil.print_magenta(rf'len(df_describe) : {len(df_describe)}')
+        mean_close = df_concated.groupby('주식명')['종가'].mean()
+        # DebuggingUtil.print_magenta(f'mean_close : \n{mean_close}')
+        # DebuggingUtil.print_magenta(rf'type(mean_close) : {type(mean_close)}')
+        # DebuggingUtil.print_magenta(rf'len(mean_close) : {len(mean_close)}')
+        stock_name_biggist_mean_close = df_concated.groupby('주식명')['종가'].mean().idxmax()  # 평균종가 가 가장큰 '주식명'
+        # DebuggingUtil.print_magenta(f'stock_name_biggist_mean_close : \n{stock_name_biggist_mean_close}')
+        # DebuggingUtil.print_magenta(rf'type(stock_name_biggist_mean_close) : {type(stock_name_biggist_mean_close)}')
+        # DebuggingUtil.print_magenta(rf'len(stock_name_biggist_mean_close) : {len(stock_name_biggist_mean_close)}')
+
+        # 검색된주식 날짜 종가 시각화(테이블)
+        # df_to_visualize = df_concated
+        # fig = ff.create_table(df_to_visualize)
+        # fig.show()
+
+        return df_concated
+
+    finally:
+        # driver.close()
+        driver.quit()
+
+
+# @TestUtil.measure_seconds_performance_nth # 이 데코레이션 두개 걸어두면 중간에 멈춰버림
+def crawl_won_dollar_exchange_rate_via_naver_pay_finance():
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    '''환율 크롤링'''
+    # 1USD == ?KRW
+    import requests as rq
+
+    url = "https://finance.naver.com/marketindex/"
+    DebuggingUtil.print_magenta(rf'''url : {url}''')
+    response = rq.get(url)
+    # response = rq.get(url).json()
+    if response.status_code == 200:
+        data_bytes = response.content
+        # DebuggingUtil.print_magenta(rf'''data_bytes : {data_bytes}''')
+        soup = BeautifulSoup(data_bytes, "lxml")
+        # DebuggingUtil.print_magenta(f'soup : \n{soup}')
+        # DebuggingUtil.print_magenta(rf'type(soup) : {type(soup)}')
+        # DebuggingUtil.print_magenta(rf'len(soup) : {len(soup)}')
+        # data_rs = soup.find_all(class_='head_info head_info') # 2024 03 04 새벽에 SUCCESS, 2024 03 04 보니 head_info point_dn 로 변경됨 FAIL
+        data_rs = soup.find_all(class_='head_info point_dn')  # 2024 03 04 새벽에 SUCCESS, 2024 03 04 보니 head_info point_dn 로 변경됨 FAIL
+        # DebuggingUtil.print_magenta(f'data_rs : \n{data_rs}')
+        # DebuggingUtil.print_magenta(rf'type(data_rs) : {type(data_rs)}')
+        # DebuggingUtil.print_magenta(rf'len(data_rs) : {len(data_rs)}')
+        # DebuggingUtil.print_magenta(f'data_rs[0] : \n{data_rs[0]}')
+        # DebuggingUtil.print_magenta(rf'type(data_rs[0]) : {type(data_rs[0])}')
+        # DebuggingUtil.print_magenta(rf'len(data_rs[0]) : {len(data_rs[0])}')
+        data_tag = data_rs[0]
+        # DebuggingUtil.print_magenta(f'data_tag : \n{data_tag}')
+        # DebuggingUtil.print_magenta(rf'type(data_tag) : {type(data_tag)}')
+        # DebuggingUtil.print_magenta(rf'len(data_tag) : {len(data_tag)}')
+        data_tag = data_tag.find(class_='value')
+        # DebuggingUtil.print_magenta(f'data_tag : \n{data_tag}')
+        # DebuggingUtil.print_magenta(rf'type(data_tag) : {type(data_tag)}')
+        # DebuggingUtil.print_magenta(rf'len(data_tag) : {len(data_tag)}')
+        data_str = data_tag.text
+        data_str = data_str.replace(",", '')
+        # DebuggingUtil.print_magenta(f'data_str : \n{data_str}')
+        data_float = float(data_str)
+        won_dollar_exchange_rate = data_float
+        # DebuggingUtil.print_magenta(f'won_dollar_exchange_rate : {won_dollar_exchange_rate}')
+        DebuggingUtil.print_magenta(f'네이버 페이 증권 원달러-환율정보 크롤링 결과, 1달러(USD)는  {won_dollar_exchange_rate}원(KRW) 입니다')
+        return won_dollar_exchange_rate
+    else:
+        DebuggingUtil.print_ment_fail(f'url: {url} 요청이 실패')
+
+
+# @TestUtil.measure_seconds_performance_nth
+def update_ticker_xlsx_watched():
+    '''
+    주식 관심종목 티커정보 업데이트 함수
+    update_ticker_xlsx().xlsx 의 데이터를 의존함.
+    '''
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    from tqdm import tqdm
+
+    # df 에 저장
+    FILE_XLSX = fr"{StateManagementUtil.DIRECTORY_PKG_XLSX}/update_ticker_xlsx().xlsx"
+    DebuggingUtil.print_magenta(rf'''FILE_XLSX : {FILE_XLSX}''')
+    df_xlsx = pd.read_excel(FILE_XLSX)
+    # DebuggingUtil.print_magenta(f'df_xlsx : \n{df_xlsx}')
+    # DebuggingUtil.print_magenta(rf'type(df_xlsx) : {type(df_xlsx)}')
+    DebuggingUtil.print_magenta(rf'len(df_xlsx) : {len(df_xlsx)}')
+
+    # 관심종목 레코드 df 최상단 재배치 진행률
+    # df의 특정(조건에 충족하는)레코드들을 df 최상단으로 배치
+    watch_keywords_list = StateManagementUtil.WATCH_KEYWORDS_LIST
+    df_concated = df_xlsx
+
+    # for i in tqdm(range(0, len(watch_keywords_list)), desc=f"{inspect.currentframe().f_code.co_name}()"):
+    for i in tqdm(range(0, len(watch_keywords_list)), desc=f"관심종목 레코드 df 최상단 재배치 진행률"):
+        pattern = watch_keywords_list[i]
+        pattern = re.compile(pattern, re.IGNORECASE)
+        condition = df_concated['stock_name'].str.contains(pattern)
+        df_meeted = df_concated[condition]
+        df_meeted_not = df_concated[~condition]
+        df_concated = pd.concat([df_meeted, df_meeted_not], ignore_index=True, axis=0)
+
+    condition = df_concated['stock_name'].isin(watch_keywords_list)
+    df_meeted = df_concated[condition]
+    df_meeted_not = df_concated[~condition]
+    df_concated = pd.concat([df_meeted, df_meeted_not], ignore_index=True, axis=0)
+    # DebuggingUtil.print_magenta(f'df_concated : \n{df_concated}')
+    # DebuggingUtil.print_magenta(rf'type(df_concated) : {type(df_concated)}')
+    # DebuggingUtil.print_magenta(rf'len(df_concated) : {len(df_concated)}')
+
+    condition = df_concated['ticker'].isin(watch_keywords_list)
+    df_meeted = df_concated[condition]
+    df_meeted_not = df_concated[~condition]
+    df_concated = pd.concat([df_meeted, df_meeted_not], ignore_index=True, axis=0)
+    # DebuggingUtil.print_magenta(f'df_concated : \n{df_concated}')
+    # DebuggingUtil.print_magenta(rf'type(df_concated) : {type(df_concated)}')
+    # DebuggingUtil.print_magenta(rf'len(df_concated) : {len(df_concated)}')
+    df_concated = df_concated[['ticker', 'stock_name', 'market_name']]
+
+    # 샘플 출력
+    df_headed = df_concated.head(100)
+    DebuggingUtil.print_magenta(f'df_headed : \n{df_headed}')
+    # DebuggingUtil.print_magenta(rf'type(df_headed) : {type(df_headed)}')
+    # DebuggingUtil.print_magenta(rf'len(df_headed) : {len(df_headed)}')
+
+    # func().xlsx 에 저장
+    FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    FileSystemUtil.make_leaf_file(FILE_XLSX)
+    df_concated.to_excel(FILE_XLSX)
+
+    # df 에 저장
+    FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    DebuggingUtil.print_magenta(rf'''FILE_XLSX : {FILE_XLSX}''')
+    df_xlsx = pd.read_excel(FILE_XLSX)
+    # DebuggingUtil.print_magenta(f'df_xlsx : \n{df_xlsx}')
+    # DebuggingUtil.print_magenta(rf'type(df_xlsx) : {type(df_xlsx)}')
+    DebuggingUtil.print_magenta(rf'len(df_xlsx) : {len(df_xlsx)}')
+
+
+# @TestUtil.measure_seconds_performance_nth
+def update_stack_info_xlsx_watched():
+    '''
+    주식 관심종목 주식 정보 업데이트
+    update_ticker_xlsx_watched().xlsx 파일을 의존함.
+    '''
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+    import yfinance as yf
+    from matplotlib import pyplot as plt
+
+    # # df 에 저장
+    # FILE_XLSX = fr"{StateManagementUtil.DIRECTORY_PKG_XLSX}/update_ticker_xlsx_watched().xlsx"
+    # # DebuggingUtil.print_magenta(rf'''FILE_XLSX : {FILE_XLSX}''')
+    # df = pd.read_excel(FILE_XLSX)
+    # # DebuggingUtil.print_magenta(f'df : \n{df}')
+    # # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    # # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    # df = df.head(len(StateManagementUtil.WATCH_KEYWORDS_LIST)) # 모든 종목을 크콜링하려면 주석처리 len(StateManagementUtil.WATCH_KEYWORDS_LIST) 는 얼추 맞춘거지 정확도가 낮음.
+    # # DebuggingUtil.print_magenta(f'df : \n{df}')
+    # # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    # # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    # df_ticker_info = df[['ticker', 'stock_name', 'market_name']]
+    # # DebuggingUtil.print_magenta(f'df_ticker_info : \n{df_ticker_info}')
+    # # DebuggingUtil.print_magenta(rf'type(df_ticker_info) : {type(df_ticker_info)}')
+    # # DebuggingUtil.print_magenta(rf'len(df_ticker_info) : {len(df_ticker_info)}')
+    # df = df[['ticker']]
+    # data_list = df['ticker'].tolist()
+    # tickers = data_list
+    # DebuggingUtil.print_magenta(f'tickers : {tickers}')
+    # DebuggingUtil.print_magenta(rf'len(tickers) : {len(tickers)}')
+    #
+    # tickers_errored = []  # fail?, try 처리 안되는 것 같은데?
+    # df_concated_yf = pd.DataFrame()
+    # df_concated_krx = pd.DataFrame()
+    # for i in range(0, len(tickers)):
+    #     # for i in tqdm(range(0, len(tickers)), desc="미국/한국 주식정보 크롤링 진행률"):
+    #     try:
+    #         if tickers[i].isdigit():  # 한국주식 ticker는 숫자구성, 추가적으로 아닌 경우있다면 수정필요.
+    #             # df = BusinessLogicUtil.get_stock_name(tickers[i])
+    #             # df = df[['stock_name']]
+    #             # data_list = df['stock_name'].tolist()
+    #             # DebuggingUtil.print_magenta(rf'data_list : {data_list}')
+    #             # DebuggingUtil.print_magenta(rf'type(data_list) : {type(data_list)}')
+    #             # DebuggingUtil.print_magenta(rf'len(data_list) : {len(data_list)}')
+    #             # stock_name = data_list[0]
+    #             # DebuggingUtil.print_ment_light_white(f'''{stock_name} 주식가격 정보 웹크롤링''')
+    #
+    #             # selenium way
+    #             driver = SeleniumUtil.get_driver_for_selenium()
+    #             target_url = f'https://finance.naver.com/item/sise_day.nhn?code={tickers[i]}&page=1'
+    #             DebuggingUtil.print_magenta(rf'''target_url : {target_url}''')
+    #             driver.get(target_url)
+    #             html = driver.page_source
+    #             # DebuggingUtil.print_magenta(rf'''html : {html}''')
+    #             soup = BeautifulSoup(html, "lxml")
+    #             # DebuggingUtil.print_magenta(rf'soup : {soup}')
+    #             # DebuggingUtil.print_magenta(rf'type(soup) : {type(soup)}')
+    #             # DebuggingUtil.print_magenta(rf'len(soup) : {len(soup)}')
+    #             table = soup.select("table")
+    #             # DebuggingUtil.print_magenta(rf'table : {table}')
+    #             # DebuggingUtil.print_magenta(rf'type(table) : {type(table)}')
+    #             # DebuggingUtil.print_magenta(rf'len(table) : {len(table)}')
+    #             data_str = str(table[0])
+    #             data_string_io = StringIO(data_str)
+    #             data_list = pd.read_html(data_string_io)
+    #             # DebuggingUtil.print_magenta(rf'data_list[0] : {data_list[0]}')
+    #             # DebuggingUtil.print_magenta(rf'type(data_list[0]) : {type(data_list[0])}')
+    #             # DebuggingUtil.print_magenta(rf'len(data_list[0]) : {len(data_list[0])}')
+    #             df = data_list[0]
+    #             # DebuggingUtil.print_magenta(rf'df : {df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             df = df.dropna()  # NaN 값을 포함하는 모든 행을 삭제
+    #             # DebuggingUtil.print_magenta(rf'df : {df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')
+    #             # DebuggingUtil.print_magenta(rf'type(df.columns) : {type(df.columns)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df.columns) : {len(df.columns)}')
+    #             df.columns = ['날짜', '종가', '전일비', '시가', '고가', '저가', '거래량']
+    #             # DebuggingUtil.print_magenta(rf'''df.columns : {df.columns}''')
+    #             # DebuggingUtil.print_magenta(rf'type(df.columns) : {type(df.columns)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df.columns) : {len(df.columns)}')
+    #             # DebuggingUtil.print_magenta(f'stock_name : \n{stock_name}')
+    #             # DebuggingUtil.print_magenta(rf'type(stock_name) : {type(stock_name)}')
+    #             # DebuggingUtil.print_magenta(rf'len(stock_name) : {len(stock_name)}')
+    #             # df['주식명'] = stock_name
+    #             df['날짜'] = pd.to_datetime(df['날짜'])
+    #             df['날짜'] = df['날짜'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    #             df['티커'] = tickers[i]
+    #             data_list = df['종가'].tolist()
+    #             df['수정종가'] = pd.DataFrame(data_list)  # 수정종가 를 알 수 없어, 종가를 수정종가 와 동등하도록 임의 초기화
+    #             df = df[['티커', '날짜', '시가', '고가', '저가', '종가', '수정종가', '거래량']]
+    #             # DebuggingUtil.print_magenta(rf'df : {df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             # df_concated_krx = pd.concat([df_concated_krx, df], ignore_index=True, axis=0)
+    #             df_concated_krx = pd.concat([df_concated_krx, df], axis=0)  # df 세로병합
+    #         else:
+    #             df = yf.download(tickers[i], progress=False)
+    #             # DebuggingUtil.print_magenta(f'df : {df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             # DebuggingUtil.print_magenta(f'df : \n{df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             date_list = df.index
+    #             # DebuggingUtil.print_magenta(f'date_list : \n{date_list}')
+    #             # DebuggingUtil.print_magenta(rf'type(date_list) : {type(date_list)}')
+    #             # DebuggingUtil.print_magenta(rf'len(date_list) : {len(date_list)}')
+    #             df_date = pd.DataFrame(date_list)
+    #             df_date.columns = ['date']
+    #             # DebuggingUtil.print_magenta(f'df_date : \n{df_date}')
+    #             # DebuggingUtil.print_magenta(rf'type(df_date) : {type(df_date)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df_date) : {len(df_date)}')
+    #             df.reset_index(drop=True, inplace=True)  # drop=True df.index를 drop, inplace=True df.index의 제자리에서 수정
+    #             df = pd.concat([df, df_date], axis=1)
+    #             # DebuggingUtil.print_magenta(f'df.columns : \n{df.columns}')
+    #             df.columns = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'date']
+    #             # DebuggingUtil.print_magenta(f'df : \n{df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             df['date'] = pd.to_datetime(df['date'])
+    #             df['date'] = df['date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    #             df['ticker'] = tickers[i]
+    #             df = df[['ticker', 'date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']]
+    #             df = pd.concat([df_concated_yf, df], axis=0)  # df 세로병합
+    #             # DebuggingUtil.print_magenta(f'df : \n{df}')
+    #             # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    #             # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #             df_concated_yf = df
+    #             BusinessLogicUtil.sleep(milliseconds=random.randint(1777, 2111), print_mode=False)
+    #     except:
+    #         traceback.print_exc(file=sys.stdout)
+    #         # TestUtil.pause()
+    #         tickers_errored.append(tickers[i])
+    # DebuggingUtil.print_magenta(f'tickers_errored : {tickers_errored}')
+    # DebuggingUtil.print_magenta(rf'len(tickers_errored) : {len(tickers_errored)}')
+    # df_concated_krx = df_concated_krx[['티커', '날짜', '시가', '고가', '저가', '종가', '수정종가', '거래량']]
+    # # DebuggingUtil.print_magenta(f'df_concated_krx : \n{df_concated_krx}')
+    # # DebuggingUtil.print_magenta(rf'type(df_concated_krx) : {type(df_concated_krx)}')
+    # # DebuggingUtil.print_magenta(rf'len(df_concated_krx) : {len(df_concated_krx)}')
+    # df_concated_krx.columns = ['ticker', 'date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+    # # DebuggingUtil.print_magenta(f'df_concated_krx : \n{df_concated_krx}')
+    # # DebuggingUtil.print_magenta(rf'type(df_concated_krx) : {type(df_concated_krx)}')
+    # # DebuggingUtil.print_magenta(rf'len(df_concated_krx) : {len(df_concated_krx)}')
+    # won_dollar_exchange_rate = crawl_won_dollar_exchange_rate_via_naver_pay_finance()  # 원에서 달러로 단위변환(원달러 환율 적용)
+    # df_concated_krx['Open'] = df_concated_krx['Open'] / won_dollar_exchange_rate
+    # df_concated_krx['High'] = df_concated_krx['High'] / won_dollar_exchange_rate
+    # df_concated_krx['Low'] = df_concated_krx['Low'] / won_dollar_exchange_rate
+    # df_concated_krx['Close'] = df_concated_krx['Close'] / won_dollar_exchange_rate
+    # df_concated_krx['Adj Close'] = df_concated_krx['Adj Close'] / won_dollar_exchange_rate
+    # df_concated_krx['Volume'] = df_concated_krx['Volume'] / won_dollar_exchange_rate
+    # # DebuggingUtil.print_magenta(f'df_concated_krx : \n{df_concated_krx}')
+    # # DebuggingUtil.print_magenta(rf'type(df_concated_krx) : {type(df_concated_krx)}')
+    # # DebuggingUtil.print_magenta(rf'len(df_concated_krx) : {len(df_concated_krx)}')
+    # # DebuggingUtil.print_magenta(f'df_concated_yf : \n{df_concated_yf}')
+    # # DebuggingUtil.print_magenta(rf'type(df_concated_yf) : {type(df_concated_yf)}')
+    # # DebuggingUtil.print_magenta(rf'len(df_concated_yf) : {len(df_concated_yf)}')
+    # # DebuggingUtil.print_magenta(rf'''df_concated_krx.columns : {df_concated_krx.columns}''')
+    # # DebuggingUtil.print_magenta(rf'''df_concated_yf.columns : {df_concated_yf.columns}''')
+    #
+    # # df join/merge
+    # # df_concated = pd.concat([df_ticker_info, df], ignore_index=True, axis=0)  # df 세로병합
+    # # df_merged = pd.merge(df_ticker_info, df, on='ticker', how='outer')
+    # # df_merged = pd.merge(df_ticker_info, df, on='ticker', how='inner')
+    # # df_merged = pd.merge(df_ticker_info, df, on='ticker', how='left')
+    # # df_merged = pd.merge(df_ticker_info, df, on='ticker', how='right')
+    # # df_diff = pd.concat([df1, df2], axis=0 ).drop_duplicates(keep=False)
+    #
+    # # df join
+    # df_usa = pd.merge(df_ticker_info, df_concated_yf, on='ticker', how='inner')
+    # df_usa['ticker'] = df_usa['ticker'] + "[" + df_usa['stock_name'] + "]"
+    # df_krx = pd.merge(df_ticker_info, df_concated_krx, on='ticker', how='inner')
+    # # df_krx['ticker'] = f"{df_krx['stock_name']}[{df_krx['ticker']}]" # fail
+    # df_krx['ticker'] = df_krx['stock_name'] + "[" + df_krx['ticker'] + "]"
+    # df = pd.concat([df_usa, df_krx], ignore_index=True, axis=0)
+    #
+    #
+    # # DebuggingUtil.print_magenta(f'df : \n{df}')
+    # # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    # # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    #
+    # # function().xlsx 에 저장
+    # FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    # FileSystemUtil.make_leaf_file(FILE_XLSX)
+    # df.to_excel(FILE_XLSX)
+    # # DebuggingUtil.print_magenta(f'df : \n{df}')
+    # # DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    # # DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+
+    # df 에 저장
+    FILE_XLSX = f"{StateManagementUtil.DIRECTORY_PKG_XLSX}/{inspect.currentframe().f_code.co_name}().xlsx"
+    DebuggingUtil.print_magenta(rf'''FILE_XLSX : {FILE_XLSX}''')
+    df = pd.read_excel(FILE_XLSX)
+    DebuggingUtil.print_magenta(f'df : \n{df}')
+    DebuggingUtil.print_magenta(rf'type(df) : {type(df)}')
+    DebuggingUtil.print_magenta(rf'len(df) : {len(df)}')
+    # df = pd.read_csv(rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_recycle_bin\test.xlsx")
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_html(FILE_HTML)
+
+    #  df에서 ticker 별로 x축은 date 이고, y축은 Adj Close에 대한 변화를 꺽은선 그래프로 plot 을 사용해서 html 에 그리고 싶어
+    # df.groupby('ticker')['Adj Close'].plot(legend=True)
+    # plt.title("Ticker별 date에 따른 Adj Close 변화")
+    plt.title('날짜에 따른 Ticker별 관심종목 수정종가(Close) 변화', color='red')
+    plt.rcParams['font.family'] = 'Malgun Gothic'  # 한글폰트 적용
+    # font_abspath = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_fonts\GmarketSans\GmarketSansTTFLight.ttf"
+    # # font_abspath = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_fonts\Rubik_Doodle_Shadow\RubikDoodleShadow-Regular.ttf" # 너무 귀여운 입체감 있는 영어폰트
+    # plt.rcParams['font.family'] = pkg_park4139_for_linux.Park4139.get_font_name_for_mataplot(font_abspath)
+    # 폰트가 깨진것 같을 때, 캐싱된 폰트 캐시 삭제하기 위해 사용
+    # import matplotlib.font_manager as fm
+    # fm._rebuild()
+    # plt.grid(True)
+    # plt.rcParams['figure.facecolor'] = 'black'  # '바탕색'
+    # plt.rcParams['axes.edgecolor'] = 'white'  # '테두리 색'
+    # plt.rcParams['axes.facecolor'] = 'black'  # '바탕색'
+    # plt.rc('font', family='NanumGothicOTF') # For MacOS
+    # plt.rc('font', family='NanumGothic')  # For Windows
+    fig, ax = plt.subplots()
+    for ticker, data in df.groupby('ticker'):
+        ax.plot(data['date'], data['Adj Close'], label=ticker)
+
+    # x 축에 날짜 형식을 지정
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    from matplotlib.ticker import MultipleLocator
+    # date_formatter = mdates.DateFormatter('%Y-%m-%d')
+    date_formatter = mdates.DateFormatter('%Y')
+    # ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    # ax.xaxis.set_major_locator(MultipleLocator(base=5))
+    ax.xaxis.set_major_locator(mdates.YearLocator(base=10))
+    ax.xaxis.set_major_formatter(date_formatter)
+    ax.tick_params(axis='x', rotation=45)
+    ax.tick_params(axis='y', rotation=45)
+    ax.set_xlabel('날짜', rotation=0, verticalalignment='center')
+    # ax.xaxis.set_label_coords(-0.15, 0)
+    ax.set_ylabel('수정 종가', rotation=0, verticalalignment='center')  # '수정 종가' 텍스트를 90도로 회전하고 수직으로 정렬합니다.
+    ax.yaxis.set_label_coords(-0.15, 0.5) # '수정 종가'와 y축 스케일과 글자가 겹침,  y 축 레이블의 위치를 보정.
+    ax.legend()
+    plt.tight_layout()  # '날짜' 글자가 잘리는 것을 예방
+
+    # png에 저장(그래프)
+    FILE_PNG = f"{StateManagementUtil.DIRECTORY_PKG_PNG}/{inspect.currentframe().f_code.co_name}().png"
+    FileSystemUtil.make_leaf_file(FILE_PNG)
+    plt.savefig(FILE_PNG)
+
+    # HTML에 저장(그래프)
+    FILE_HTML = f"{StateManagementUtil.DIRECTORY_PKG_HTML}/{inspect.currentframe().f_code.co_name}().html"
+    FileSystemUtil.make_leaf_file(FILE_HTML)
+    data_html = f"""
+    <html>
+    <body>
+    <h1>Ticker별 Adj Close 변화</h1>
+    <img src="{FILE_PNG}">
+    </body>
+    </html>
+    """
+    with open(FILE_HTML, "w") as f:
+        f.write(data_html)
+
+    # # 꺽은선 그래프 (line plot)
+    # import plotly.express as px
+    # # DebuggingUtil.print_magenta(f'df.columns : \n{df.columns}')
+    # fig = px.line(data_frame=df, y=df['Adj Close'], x=df['date'], markers=True, color=df['ticker'])
+    # # line_color = ['yellowgreen', 'yellow', 'whitesmoke', 'white', 'wheat', 'violet', 'turquoise', 'tomato', 'thistle', 'teal', 'tan', 'steelblue', 'springgreen', 'snow', 'slategrey', 'slategray', 'slateblue', 'skyblue', 'silver', 'sienna', 'seashell', 'seagreen', 'sandybrown', 'salmon', 'saddlebrown', 'royalblue', 'rosybrown', 'red', 'rebeccapurple', 'purple', 'powderblue', 'plum', 'pink', 'peru', 'peachpuff', 'papayawhip', 'palevioletred', 'paleturquoise', 'palegreen', 'palegoldenrod', 'orchid', 'orangered', 'orange', 'olivedrab', 'olive', 'oldlace', 'navy', 'navajowhite', 'moccasin', 'mistyrose', 'mintcream', 'midnightblue', 'mediumvioletred', 'mediumturquoise', 'mediumspringgreen', 'mediumslateblue', 'mediumseagreen', 'mediumpurple', 'mediumorchid', 'mediumblue', 'mediumaquamarine', 'maroon', 'magenta', 'linen', 'limegreen', 'lime', 'lightyellow', 'lightsteelblue', 'lightslategrey', 'lightslategray', 'lightskyblue', 'lightseagreen', 'lightsalmon', 'lightpink', 'lightgrey', 'lightgreen', 'lightgray', 'lightgoldenrodyellow', 'lightcyan', 'lightcoral', 'lightblue', 'lemonchiffon', 'lawngreen', 'lavenderblush', 'lavender', 'khaki', 'ivory', 'indigo', 'indianred', 'hotpink', 'honeydew', 'grey', 'greenyellow', 'green', 'gray', 'goldenrod', 'gold', 'ghostwhite', 'gainsboro', 'fuchsia', 'forestgreen', 'floralwhite', 'firebrick', 'dodgerblue', 'dimgrey', 'dimgray', 'deepskyblue', 'deeppink', 'darkviolet', 'darkturquoise', 'darkslategrey', 'darkslategray', 'darkslateblue', 'darkseagreen', 'darksalmon', 'darkred', 'darkorchid', 'darkorange', 'darkolivegreen', 'darkmagenta', 'darkkhaki', 'darkgrey', 'darkgreen', 'darkgray', 'darkgoldenrod', 'darkcyan', 'darkblue', 'cyan', 'crimson', 'cornsilk', 'cornflowerblue', 'coral', 'chocolate', 'chartreuse', 'cadetblue', 'burlywood', 'brown', 'blueviolet', 'blue', 'blanchedalmond', 'black', 'bisque', 'beige', 'azure', 'aquamarine', 'aqua', 'antiquewhite', 'aliceblue']
+    # # line_color = line_color[:len(df.columns)]
+    # # line_color = random.choice([line_color])
+    # # fig.update_traces(line_width=1, line_dash='dash', line_color=line_color)
+    # fig.show()
+
+    # fig = ff.create_table(df)
+    # fig.show()
+
+
+@TestUtil.measure_seconds_performance_nth
+def test_test_test():
+    '''
+
+    '''
+    DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
+
+    # crawl 을 할 때 대상 url 이 get 방식이면 request/bs 사용, 추후 빠른동작을 기대
+    # crawl 을 할 때 대상 url 이 post 방식이면 selenium/bs 사용, request/bs 방식이 안되는 경우 해결 기대
+
+    # 티커 중복처리 코드
+    # 국가의 중복
+    # 티커.국가코드
+    # 티커.거래소코드
+
+    # 26,전업투자자, 적은 금액으로 미수금을 풀, 스켈핑, 돌파매매, 소액으로 안되면 큰돈으로 해도 안된다.
+    # 40, 전업투자자, 이평선 매매 이격이 크면, 이격 사이에 반등이 나올 확률이 크다, 월 5%-10 수익 목표, 한가지매매법 1년 이상 유지
+    # 봉차트
+    # 키움, 차트보기
+    # 하나대투, 주문
+    # 인베스팅 닷컴 크롤링
+    # # speak("매수신호발생")
+    #
+    # 예수금 100만원 일수익금 1만원 월수익금 20만원, 1년간 90프로 확율료
+    # 예수금 10000만원 일수익금 100만원 월수익금 20만원, 1년간 90프로 확율료
+    # 뇌동매매 안해야 한다
+    #
+    # 돌파매매
+    # 종가베팅
+    # 대형주베팅
+    # 상따
+    #
+    # 강방천 회장, 1년 뒤에 저 기업이 수면제 먹고 눈 떴을 때 있을까?,  기업의 서비스가 주머니를 열게 하나?,분산투자 반드시 할 것
+    #
+    # 휴대폰, 한 집에 두개
+    # 네이버 꺼 하나 사고
+    # 삼성oo랑 메타랑 협업 한다고 하잖아, 큰 그림 그리길 기대하고 하나 하보자.
+    #
+    # 최원호, 힐링여행자, 약세장이 1-2년에 모아서, 강세장이 4-5년에 팔면, 가진돈의 두배 정도가 될 것, 웃음이 새어나오는
+    #
+    # 피터린치, 칵테일파티 면 고점분위기, 아니면 저점분위기, 이 관점에서는 AI 는 고점
+
+    # 죽음 # 주가담보대출 # 반대매매
+
+    # 유퀴즈, 원양어선, 일등항해사, 억대연봉
+    # https://www.youtube.com/watch?v=6hYpI_5kXHY
+
+    # 시세정보 via DataReader(),
+    # fdr_dr = fdr.DataReader('000150', '2018-01-01', '2019-10-30', exchange='KRX')  # 005930 삼성전자 # 000150 두산 # 특정기간 # exchange='KRX' 거래소, # exchange='KRX-DELISTING' KRX에서 상장폐지된
+    # ticker 제한
+    # 티커란, 미국에서 사용하는 종목 코드이며 네 자리로 제안
+    # DebuggingUtil.print_ment_magenta(rf'type(fdr_dr) : {type(fdr_dr)}')
+    # DebuggingUtil.print_ment_magenta(rf'''fdr_dr : {fdr_dr}''')
+
+    # DebuggingUtil.print_ment_magenta(rf'''df['학번'].to_string(index=False) : {df['학번'].to_string(index=False)}''')  # 특정 컬럼만 보기(데이터조회), index 제거하고
+    # df = df.query("학번==1001")
+    # df = df.query("continent == 'Europe' and year == 2007 and pop > 2.e6")
+
+    # 산점도 그래프 (scatter plot)
+    # fig = px.scatter(df, y=columns[1], x=columns[2], color=columns[1], color_continuous_scale=px.colors.sequential.Viridis)
+
+    # 꺽은선 그래프 (line plot)
+    # fig = px.line(data_frame=df, y=columns[2], x=columns[1],markers=True , color=columns[2])
+    # fig = px.line(data_frame=df, y=columns[2], x=columns[1], markers=True)  # success
+    # fig.update_traces(line_width=1, line_dash='dash', line_color="red")
+
+    # 막대그래프 (bar plot)
+    # fig = px.bar(df, y=columns[2], x=columns[1], color=columns[2], color_discrete_sequence=px.colors.qualitative.G10) # 세로형, color 는 범례
+    # fig = px.bar(df, y=columns[1], x=columns[2], color=columns[1], color_discrete_sequence=px.colors.qualitative.G10)  # 가로형
+    # fig.update_traces(textfont_size=12, textfont_color='red', textfont_family="Times", textangle=0, textposition="outside")
+    # fig.update_traces(textfont_size=12, textfont_color='red', textfont_family="Times", textangle=0, textposition="inside")
+    # fig.update_traces(textfont_size=12, textfont_color='red', textfont_family="Times", textangle=0, textposition="auto")
+    # 5개 막대 색 설정( x 가 5개 여야 할 듯)
+    # colors = ['lightslategray', 'crimson', 'lightslategray', 'lightslategray', 'lightslategray']
+    # import plotly.graph_objects as go
+    # fig = go.Figure()
+    # fig.add_trace(go.Bar(x=['Feature A', 'Feature B', 'Feature C', 'Feature D', 'Feature E'], y=[20, 14, 23, 25, 22],
+    #                      marker_color=colors))
+
+    # 원 그래프 (Pie chart)
+    # fig = px.pie(values=[4500, 2500, 1053, 500], names=['Oxygen', 'Hydrogen', 'Carbon_Dioxide', 'Nitrogen'])
+    # fig.update_traces(textposition='outside', textinfo='label+percent+value', textfont_size=20, textfont_color="black")
+    # fig.update_traces(marker_colors=px.colors.sequential.RdBu, marker_line_color="black", marker_line_width=2)
+
+    # 테이블(Table)
+    # import plotly.graph_objects as go
+    # fig = go.Figure()
+    # fig.add_trace(go.Table(
+    #     header=dict(values=['A Scores', 'B Scores'],
+    #                 line_color='darkslategray',
+    #                 # fill_color='lightskyblue',
+    #                 fill_color=['rgb(239, 243, 255)', 'rgb(189, 215, 231)'], # 컬럼 색상
+    #
+    #                 align="center"),
+    #     cells=dict(values=[[100, 90, 80, 90],  # 1열
+    #                        [95, 85, 75, 95]],  # 2열
+    #                line_color='darkslategray',
+    #                # fill_color='lightcyan',
+    #                fill_color=['rgb(230, 240, 250)', 'rgb(180, 210, 230)'],
+    #                align="center")))
+    # fig.show()
+
+    # Plotly 의 Available templates 테스트
+    # import plotly.io as pio
+    # DebuggingUtil.print_ment_magenta(rf'''pio.templates : {pio.templates}''')
+    # templates_available = ['ggplot2', 'seaborn', 'simple_white', 'plotly', 'plotly_white', 'plotly_dark', 'presentation', 'xgridoff', 'ygridoff', 'gridon', 'none']
+    # for template in templates_available:
+    #     fig = px.scatter(df,
+    #                      y=columns[2], x=columns[1], color=columns[1], size=columns[2],
+    #                      # log_x=True,
+    #                      size_max=60,
+    #                      template=template, title=f"Plotly 내장 템플릿들을 직접 보고 고르세요: based on '{template}' theme")
+    #     fig.show()
+
+    # Hover 말풍선 텍스트 편집
+    # fig.update_traces(hovertemplate='x: %{x} <br>y: %{y}')
+    # fig.update_traces(hovertemplate='이름: %{x} <br>점수: %{y}')
+    # fig.update_traces(hovertemplate=None, selector={'name': 'Europe?????????'})  # revert to default hover
+
+    # 마우스 팁을 따라다니는 수평 수직선 설정
+    # fig.update_xaxes(showspikes=True, spikecolor="green", spikesnap="cursor", spikemode="across", spikethickness=0.5)
+    # fig.update_yaxes(showspikes=True, spikecolor="green", spikethickness=0.5)
+
+    # 로컬 테스트 화면 chrome 에서 출력
+    # config = {'displayModeBar': False} # 모든버튼 제거
+    # config = {'modeBarButtonsToRemove': ['zoom', 'pan']}  # 특정버튼 제거
+    # fig.show(config=config)
+
+    # fig = px.histogram(df, y=columns[2], x=columns[1], histfunc='sum', facet_col=columns[1], )
+
+    # 파일로 저장하기
+    # fig.write_image("df_fig.png")
+    # fig.write_image("df_fig.jpeg")
+    # fig.write_image("df_fig.svg")
+    # fig.write_image("df_fig.webp")
+    # fig.write_image("df_fig.pdf")
+    # fig.write_html("df_fig.html")
+
+    # # FILE_XLS = rf"{pkg_park4139_for_linux.Park4139.PROJECT_DIRECTORY}\$cache_recycle_bin\test.xlsx"
+    # df = pd.read_csv(FILE_CSV)
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_usa_states.csv')
+    # df = pd.read_sql(FILE_SQL)
+    # df = pd.read_html(FILE_HTML)
+    # df = pd.read_excel(FILE_XLS)
+    # DebuggingUtil.print_ment_magenta(rf'''str(df) : {str(df)}''')
+    # import plotly.figure_factory as ff
+    # fig = ff.create_table(df)
+
+    # pandas 공부 후기
+    # # 엑셀에 있는 데이터들 처럼 데이터배열 을 예쁘게 해주는 라이브러리
+    # # sr(series) 는 key, value 형태의 1차원배열데이터 에 사용. df 기능으로 대체가 되므로 굳이 잘 안쓸듯.
+    # # df(dataframe) 은 2차원배열데이터에 사용. 즉, 엑셀처럼 사용, 엄청유용할 듯
+    # # df 를 출력하면 기본적으로 auto increment number 가 auto fill 된다!, 유용함!, 근데 지우는 방법도 찾아보기
+    # # csv/txt/xls/sql/html/json 파일 읽어올 수 있다고 하는데, html 도 되는데? 크롤링과 연계할 때 편리한 부분이 있을 수 있겠다
+
+    # data: np.ndarray
+    # data = np.array([[10, 20, 30], [40, 50, 60], [70, 80, 90]])  # 하드코딩으로 데이터배열
+    # # data = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])  # 하드코딩으로 데이터배열
+    # # data = np.zeros(shape=(3,3)) # shape=(3,3)인 배열에 모든 값이 0
+    # # data = np.ones(shape=(3,3)) # shape=(3,3)인 배열에 모든 값이 1
+    # # data = np.eye(3)# shape=(3,3)인 배열에 대각선 값이 1, 나머지 값이 0, 이거 활용도 높을 수 있겠다. 100  010  001 이런 순서 필요할때 있지 않겠나?
+    # # data = np.random.random((2,2)) # shape=(3,3)인 배열에 모든 값이 1보다 작은 float(1인 경우가 있나 모르겠음)
+    # # data = np.full(shape=(2,3), 7)#  # shape=(3,3)인 배열에 모든 값이 7
+    # # data = np.arange(10) #배열개수가 10 인 1차원데이터배열 # 0~9
+    # # data = np.arange(0, 10, 1) # 시작0, 종료10, 1씩증가 인1차원데이터배열 # 0~9
+    # # data = [i for i in range(0,10,1)] # 0~9
+    # # data = np.array(np.arange(30)).reshape((5, 6)) # shape = (5,6) 으로 reshape 한다, shape 안의 숫자들(5, 6) 을 곱(5 x 6)하면 원데이터의 개수(5 x 6 = 30)인와 같게 설정해야 된다. 실험해봐도 이게 맞음, list를 적당한 간격으로 자를때 유용하겠다!
+    # # data = data[0, :]# 첫번째 줄 출력
+    # # data = data[:,0]# 첫번째 기둥 출력
+    # # data = data[1,1]# 특정위치의 원소
+    # # data = data[[0, 2], [2, 0]]  # 특정 위치의 원소 두 개를 가져와 새로운 배열 # data[0, 2] 와 data[2, 0] 를 가져와 새로운 배열에 넣었습니다
+    # # data = data[0, 2] + data[2, 0] # 원소 두개를 가져와, 합을 구한다
+    # # data = data[0, 2] * data[2, 0] # 곱을 구한다, 이는 행렬에 대한 곱이 아니다. 좌표에 대한 곱이다
+    # # data = data[0, 2] ** data[2, 0] # 거듭제곱을 구한다
+    # # data = data[0, 2] / data[2, 0] # 나눈 결과를 구한다 Q + R/B  B = 나누는 수
+    # # data = data[0, 2] // data[2, 0] # 몫을 구한다
+    # # data = data[0, 2] % data[2, 0] # 나머지를 구한다
+    # # data_ = np.dot(data1, data2)# 행렬곱
+    # # test_result = f"""
+    # # mat 의 data           :
+    # # {str(data)}
+    # #
+    # # mat 의 축의 개수       :
+    # # {data.ndim}
+    # #
+    # # mat 의 배열의 모양     :
+    # # {data.shape}
+    # # """
+    # DebuggingUtil.print_ment_magenta(rf'''test_result : {test_result}''')  # 특정 컬럼만 보기(데이터조회)
+
+    # # numpy 공부 후기
+    # # 배열은 행렬과 같은 관계처럼 느껴졌다.
+    # # 다차원 행렬 자료구조 : 그냥 엑셀에서 사용하는 자료구조.
+    # # ndarray 는 다차원 행렬 자료구조로 되어 있다.
+    # # shape 배열의 생김새 정도 겠다, 표현은 shape=(3,3) 이런 형태
+    # # 실험을 해보니 첫번째 shape=(줄번호, 기둥번호) 정도로 생각하면 되겠다
+    # # 이제는 shape=(100,101) 이런 코드를 보면 데이터배열을 상상할 때 어떤 모양인지 알겠다.
+
+    # # 행렬 공부 후기
+    # # 행렬은 좌표 같다.
+    # # 행렬의 연산은 각 좌표끼리 더하거나 곱하는 것과 같다.
+
+    # import matplotlib.pyplot as plt
+    #
+    # # dir /b /s *.ttf | clip 으로 추출
+    #
+    # # 빨간 꺽은선 그래프
+    # x = [1, 2, 3, 4, 5]
+    # y = [2, 4, 6, 8, 10]
+    # plt.plot(x, y, color="red")
+    #
+    # # 노란 꺽은선 그래프
+    # plt.plot([1.5, 2.5, 3.5, 4.5], [3, 5, 8, 10], color="yellow")  # 라인 새로 추가
+    #
+    # # 범례 설정
+    # legend = plt.legend(['학생 A', '학생 B'], facecolor='k', labelcolor='white')
+    # ax = plt.gca()
+    # leg = ax.get_legend()
+    # leg.legendHandles[0].set_color('red')
+    # leg.legendHandles[1].set_color('yellow')
+    #
+    # # 전체화면 설정
+    # # mng = plt.get_current_fig_manager()
+    # # mng.full_screen_toggle()
+    #
+    # # 레이블 설정
+    # plt.xlabel('x 축 레이블', color='white')
+    # plt.ylabel('y 축 레이블', color='white')
+    # plt.tick_params(labelcolor='white')
+    #
+    # plt.show()
+    #
+    # # Matplotlib 공부 후기
+    # # 맷플롯립
+    # # 데이터 시각화 패키지 : 차트/도표/..를 그려주는 도구
+    # # 설치 : pip install matplotlib --upgrade
+    # # import 시 네이밍 관례 : as plt 로 import 한다 : import matplotlib.pyplot as plt
+    # # 조아써 이제 그래프 그릴 수 있어
+    pass
+
 
 error_cnt = 0
 if __name__ == '__main__':
     try:
-        test_loop_cnt = 1
-        DebuggingUtil.commentize("TRYING TO ENTER TEST LOOP...")
-        while True:  # test loop
-            try:
-                if test_loop_cnt == test_loop_limit + 1:
-                    break
-                DebuggingUtil.commentize(f" TEST LOOP {test_loop_cnt} STARTED")
-                test_sprint_core()
-                DebuggingUtil.commentize(f" TEST LOOP {test_loop_cnt} ENDED")
+        # ____________________________________________________________
+        # won_dollar_exchange_rate = crawl_won_dollar_exchange_rate_via_naver_pay_finance()
+        # BROADCOM
+        # update_db_stock_info_via_naver_pay_finance() # 이건 watched 된 krx 만 하는 게 좋겠다.
+        # update_db_finance_stock_ticker()
+        # crawl_geo_info()
+        # crawl_pm_ranking()
+        # crawl_korean_ultrafine_dust()
+        # crawl_naver_weather()
 
-            except:
-                print_with_test_status()
-                continue
-            test_loop_cnt = test_loop_cnt + 1
-            # Park4139.sleep(milliseconds=1000)# 루프 텀 설정
+        # crawl_finance_data_via_fdr() # krx stock info via fdr
+        # crawl_stock_info_via_naver_pay_finance(search_word="삼성전자") # krx stock info via naver pay finance
 
+        # update_ticker_xlsx() # ETF-US/NASDAQ/KRX 티커 업데이트, 상장소식 있으면 호출
+        # update_ticker_xlsx_watched() # 관심종목 ticker 업데이트, 관심종목 변경 되면 호출
+        update_stack_info_xlsx_watched()  # 관심종목 주식가격 업데이트, 장끝나면 호출, 매일 호출
+
+        # test_test_test()
+        # ____________________________________________________________
+        # Park4139.sleep(milliseconds=1000)# 루프 텀 설정
+        # ____________________________________________________________
         # 의도적 트러블 발생 테스트
         # raise shutil.Error("의도적 트러블 발생")
     except Exception as e:
@@ -1486,28 +2260,7 @@ if __name__ == '__main__':
         # logger.error(f'logger: str(e) : {"????????"}')
         # DebuggingUtil.trouble_shoot("%%%FOO%%%")
         traceback.print_exc(file=sys.stdout)
-        error_cnt = error_cnt + 1
-        error_str = traceback.format_exc()
-        DebuggingUtil.debug_as_cli(f"TEST LOOP ERROR CNT REPORT:\nerror_cnt : {error_cnt}\nerror_str : {error_str}")
         # TestUtil.pause()
 
 # 코드세그먼트 라이브스니펫
-# 웹 크롤링
-# import requests
-# from bs4 import BeautifulSoup
-#
-# # 크롤링할 페이지의 URL
-# url = 'https://wikidocs.net/book/4706'
-#
-# # 페이지 요청
-# response = requests.get(url)
-#
-# # 요청이 성공했을 경우에만 크롤링 진행
-# if response.status_code == 200:
-#     # BeautifulSoup 객체 생성
-#     soup = BeautifulSoup(response.text, 'html.parser')
-#
-#     # 모든 텍스트 출력
-#     print(soup.get_text())
-# else:
-#     print('페이지 요청이 실패했습니다.')
+# 웹크롤링

@@ -115,11 +115,11 @@ async def post_customer_service_board(request: Request):
 #                     FastapiUtil.jinja_data.contents = row.contents
 #                     FastapiUtil.jinja_data.date_reg = row.date_reg
 #                     FastapiUtil.jinja_data.del_yn = row.del_yn
-#                     DebuggingUtil.print_ment_magenta(rf'''row.writer : {row.writer}''')
-#                     DebuggingUtil.print_ment_magenta(rf'''row.title : {row.title}''')
-#                     DebuggingUtil.print_ment_magenta(rf'''row.contents : {row.contents}''')
-#                     DebuggingUtil.print_ment_magenta(rf'''row.date_reg : {row.date_reg}''')
-#                     DebuggingUtil.print_ment_magenta(rf'''row.del_yn : {row.del_yn}''')
+#                     DebuggingUtil.print_magenta(rf'''row.writer : {row.writer}''')
+#                     DebuggingUtil.print_magenta(rf'''row.title : {row.title}''')
+#                     DebuggingUtil.print_magenta(rf'''row.contents : {row.contents}''')
+#                     DebuggingUtil.print_magenta(rf'''row.date_reg : {row.date_reg}''')
+#                     DebuggingUtil.print_magenta(rf'''row.del_yn : {row.del_yn}''')
 #
 #             context = {"request": request, "jinja_data": FastapiUtil.jinja_data}
 #             return templates.TemplateResponse("/customer_service_board.html", context=context)
@@ -136,8 +136,6 @@ async def post_customer_service_board(request: Request):
 #         return RedirectResponse(redirection_url)
 
 
-
-
 @router.post('/customer-service-board2')
 async def post_customer_service_board2(request: Request):
     function_name = inspect.currentframe().f_code.co_name
@@ -150,9 +148,6 @@ async def post_customer_service_board2(request: Request):
             print(f"Field: {field}, Value: {form_data[field]}")
             if form_data[field].strip() == "":
                 return HTMLResponse(content=f'''<script>alert("필수항목({BusinessLogicUtil.get_kor_from_eng(field)})은 공백일 수 없습니다");window.history.go(-1);</script>''')
-
-
-
 
 
         # session id 가 로그인해도 되는 아이디인지 확인, 2개 아니고 1개 인지도

@@ -33,15 +33,12 @@ async def route_get_member(request: Request):
 
     FastapiUtil.jinja_data.prefix_promised = prefix_promised
 
-    # 로그인 자동화, 개발 모드에서만 동작
-    if not StateManagementUtil.is_op_mode:
-        request.session['id'] = '`'  # 서버시작 시, 테스트 계정 아이디 1로 생성 자동화 그래서 id 는 1 로 둠
 
-    # 포트폴리오용 코드
+    # 포트폴리오용 로그인 자동화 1/2
     request.session['id'] = '`'  # 서버시작 시, 테스트 계정 아이디 1로 생성 자동화 그래서 id 는 1 로 둠
-    if not 'login_cnt' in request.session:
-        request.session['login_cnt'] = "0"
-    request.session['login_cnt'] = f"{int(request.session['login_cnt'])+1}"
+    if not 'main_page_request_cnt' in request.session:
+        request.session['main_page_request_cnt'] = "0"
+    request.session['main_page_request_cnt'] = f"{int(request.session['main_page_request_cnt']) + 1}"
 
 
     if 'id' in request.session and request.session['id'] != '':
@@ -62,6 +59,14 @@ async def route_post_member(request: Request):
     DebuggingUtil.commentize(f"{function_name}()")
 
     FastapiUtil.jinja_data.prefix_promised = prefix_promised
+
+
+    # 포트폴리오용 로그인 자동화 2/2
+    # request.session['id'] = '`'  # 서버시작 시, 테스트 계정 아이디 1로 생성 자동화 그래서 id 는 1 로 둠
+    # if not 'main_page_request_cnt' in request.session:
+    #     request.session['main_page_request_cnt'] = "0"
+    # request.session['main_page_request_cnt'] = f"{int(request.session['main_page_request_cnt']) + 1}"
+
 
     # foo.html 에서 전송된 form 데이터를 변수에 저장 
     form_data = await request.form()

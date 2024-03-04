@@ -29,6 +29,7 @@ from uuid import uuid4, UUID
 import keyboard
 import mutagen
 import numpy
+import pandas as pd
 import pyglet
 import send2trash  # pip install send2trash
 import toml
@@ -45,6 +46,7 @@ from pydantic import BaseModel, field_validator
 # from screeninfo import get_monitors
 from sqlalchemy import Column, Integer, String, text as sqlalchecdmy_text, VARCHAR, select, DateTime
 from sqlalchemy import create_engine
+from sqlalchemy.exc import ResourceClosedError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -146,12 +148,16 @@ class StateManagementUtil:
         '저녁식사',
         # '음악틀기',
     ]
-    count_of_make_me_go_to_sleep = []
-    DIRECTORY_XLS_TO_MERGE = rf'{PROJECT_DIRECTORY}/pkg_xls/to_merge'
-    DIRECTORY_XLS_MERGED = rf'{PROJECT_DIRECTORY}/pkg_xls/merged'
-    MERGED_EXCEL_FILE = rf'{PROJECT_DIRECTORY}/pkg_xls/merged/머지결과물.xlsx'
-    DIRECTORY_CLOUD = rf'{PROJECT_DIRECTORY}/pkg_cloud'
+    COUNT_OF_MAKE_ME_GO_TO_SLEEP = []
+    WATCH_KEYWORDS_LIST = ['AAPL', 'TQQQ', 'QQQ', 'ARM','AVGO','AMZN', 'NVDA','NDAQ','SOXL','S&P 500', '삼성전자', '삼성전자우', '펄어비스', '엔씨소프트']
+    DIRECTORY_XLS_TO_MERGE = rf'{PROJECT_DIRECTORY}/pkg_xlsx/to_merge'
+    DIRECTORY_XLS_MERGED = rf'{PROJECT_DIRECTORY}/pkg_xlsx/merged'
+    FILE_MERGED_EXCEL_XLSX = rf'{PROJECT_DIRECTORY}/pkg_xlsx/merged/엑셀단일시트병합결과물.xlsx'
+    DIRECTORY_PKG_CLOUD = rf'{PROJECT_DIRECTORY}/pkg_cloud'
+    DIRECTORY_PKG_XLSX = f"{PROJECT_DIRECTORY}/pkg_xlsx"
     DIRECTORY_CODING_TEST_RESULT = rf'{PROJECT_DIRECTORY}/pkg_coding_test_submit'
+    DIRECTORY_PKG_HTML = f"{PROJECT_DIRECTORY}/pkg_html"
+    DIRECTORY_PKG_PNG = f"{PROJECT_DIRECTORY}/pkg_png"
 
     is_op_mode = True
 
@@ -164,8 +170,8 @@ class StateManagementUtil:
             if not FileSystemUtil.is_os_windows():
                 cls.DIRECTORY_XLS_TO_MERGE = cls.DIRECTORY_XLS_TO_MERGE.replace("\\", "/")
                 cls.DIRECTORY_XLS_MERGED = cls.DIRECTORY_XLS_MERGED.replace("\\", "/")
-                cls.MERGED_EXCEL_FILE = cls.MERGED_EXCEL_FILE.replace("\\", "/")
-                cls.DIRECTORY_CLOUD = cls.DIRECTORY_CLOUD.replace("\\", "/")
+                cls.FILE_MERGED_EXCEL_XLSX = cls.FILE_MERGED_EXCEL_XLSX.replace("\\", "/")
+                cls.DIRECTORY_PKG_CLOUD = cls.DIRECTORY_PKG_CLOUD.replace("\\", "/")
 
         except AttributeError:
             pass
@@ -487,36 +493,50 @@ class TestUtil:
     @staticmethod
     def measure_seconds_performance_nth(function):
         """시간성능 측정 데코레이터 코드"""
-
+        # DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST TRYING..."), FAIL
         # def wrapper(*args, **kwargs):
         def wrapper(**kwargs):  # **kwargs, keyword argument, dictionary 로 parameter 를 받음. named parameter / positional parameter 를 받을 사용가능?
             # def wrapper(*args):# *args, arguments, tuple 로 parameter 를 받음.
             # def wrapper():
-            DebuggingUtil.print_ment_via_colorama("___________________________________________________________ TEST START", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
-            n = 5  # 테스트 루프 반복 횟수 설정
+            # n = 10  # 테스트 루프 반복 횟수 설정
+            # n = 3
+            n = 1
             if TestUtil.is_first_test_lap:
+                DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST READY")
                 ment = rf"총 {n}번의 시간성능측정 테스트를 시도합니다"
-                TestUtil.is_first_test_lap = False
-                DebuggingUtil.print_ment_via_colorama(ment, colorama_color=ColoramaUtil.BLUE)
+                DebuggingUtil.print_ment_light_yellow(ment)
                 TextToSpeechUtil.speak_ment(ment=ment, sleep_after_play=1)
+                TestUtil.is_first_test_lap = False
+                DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST START")
             seconds_performance_test_results = TestUtil.test_results
             import time
             time_s = time.time()
-            # function(*args, **kwargs)
-            function(**kwargs)
-            # function(*args)
-            # function()
+            try:
+                DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST LOOP {len(seconds_performance_test_results)} STARTED")
+                # function(*args, **kwargs)
+                function(**kwargs)
+                # function(*args)
+                # function()
+                DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST LOOP {len(seconds_performance_test_results)} ENDED")
+                # n = n +1
+            except:
+                DebuggingUtil.trouble_shoot("%%%FOO%%%")
+                traceback.print_exc(file=sys.stdout)
+                # TestUtil.pause()
             time_e = time.time()
             mesured_seconds = time_e - time_s
             seconds_performance_test_results.append(f"{round(mesured_seconds, 2)}sec")
             if len(seconds_performance_test_results) == n:
-                ment = rf"총 {n}번의 시간성능측정 테스트가 성공 되었습니다"
+                ment = rf"총 {len(seconds_performance_test_results)}번의 시간성능측정 테스트가 성공적으로 이루어졌습니다"
                 TextToSpeechUtil.speak_ment(ment=ment, sleep_after_play=0.55)
-                DebuggingUtil.print_ment_via_colorama(rf'seconds_performance_test_results = {seconds_performance_test_results}', colorama_color=ColoramaUtil.BLUE)
-                DebuggingUtil.print_ment_via_colorama(rf'type(seconds_performance_test_results) : {type(seconds_performance_test_results)}', colorama_color=ColoramaUtil.BLUE)
-                DebuggingUtil.print_ment_via_colorama(rf'len(seconds_performance_test_results) : {len(seconds_performance_test_results)}', colorama_color=ColoramaUtil.BLUE)
-                DebuggingUtil.print_ment_via_colorama("___________________________________________________________ TEST END", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
+                DebuggingUtil.print_ment_light_yellow(rf'seconds_performance_test_results = {seconds_performance_test_results}')
+                DebuggingUtil.print_ment_light_yellow(rf'len(seconds_performance_test_results) : {len(seconds_performance_test_results)}')
+                DebuggingUtil.print_ment_light_yellow(ment)
+                DebuggingUtil.print_ment_light_yellow(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST END")
                 TestUtil.pause()
+
+            # api 테스트 시 여러번 빠르게 api 요청 시 거절 되는 것 같음. 이를 해결하기 위한 코드. 불필요 시 주석, api 제공할 때 어떤방법을 써서 3 번까지만 허용시켜둔 것 같다.
+            BusinessLogicUtil.sleep(milliseconds=random.randint(4000, 5100), print_mode=True)
 
         return wrapper
 
@@ -528,7 +548,7 @@ class TestUtil:
         def wrapper(**kwargs):  # **kwargs, keyword argument, dictionary 로 parameter 를 받음. named parameter / positional parameter 를 받을 사용가능?
             # def wrapper(*args):# *args, arguments, tuple 로 parameter 를 받음.
             # def wrapper():
-            DebuggingUtil.print_ment_via_colorama("___________________________________________________________ TEST START", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
+            # DebuggingUtil.print_ment_via_colorama(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST START", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
             if TestUtil.is_first_test_lap:
                 TestUtil.is_first_test_lap = False
             seconds_performance_test_results = TestUtil.test_results
@@ -541,7 +561,7 @@ class TestUtil:
             time_e = time.time()
             mesured_seconds = time_e - time_s
             DebuggingUtil.print_ment_via_colorama(rf'mesured_seconds = {round(mesured_seconds, 2)}', colorama_color=ColoramaUtil.BLUE)
-            DebuggingUtil.print_ment_via_colorama("___________________________________________________________ TEST END", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
+            DebuggingUtil.print_ment_via_colorama(f"{StateManagementUtil.UNDERLINE_PROMISED}TEST END", colorama_color=ColoramaUtil.LIGHTWHITE_EX)
 
         return wrapper
 
@@ -765,7 +785,7 @@ class TestUtil:
 #             # print(rf'self.is_starting_timer : {self.is_starting_timer}')
 #             # print(rf'auto_starting_seconds : {auto_click_positive_btn_after_seconds}')
 #             if self.is_closing_timer == True and self.is_starting_timer == True:
-#                 BusinessLogicUtil.debug("closing_timer 와 starting_timer 는 동시에 설정 할 수 없습니다")
+#                 DebuggingUtil.print_magenta("closing_timer 와 starting_timer 는 동시에 설정 할 수 없습니다")
 #                 sys.exit()
 #
 #             if self.is_closing_timer == True or self.is_starting_timer == True:
@@ -2402,7 +2422,7 @@ class TestUtil:
 #     #     btn_text_clicked = dialog_.btn_text_clicked
 #     #
 #     #     if btn_text_clicked == "":
-#     #         DebuggingUtil.print_ment_magenta()(f'버튼 눌렸습니다 입니다 {btn_text_clicked}')
+#     #         DebuggingUtil.print_magenta()(f'버튼 눌렸습니다 입니다 {btn_text_clicked}')
 #     #     if app == True:
 #     #         if isinstance(app_foo, QApplication):
 #     #             app_foo.exec()
@@ -2476,22 +2496,9 @@ class DebuggingUtil:
     def commentize(ment):
         # print(f'{StateManagementUtil.LINE_LENGTH_PROMISED} {ment}')
         # DebuggingUtil.print_ment_via_colorama(f'{StateManagementUtil.LINE_LENGTH_PROMISED} {ment}', colorama_color=ColoramaColorUtil.LIGHTGREEN_EX)
-        DebuggingUtil.print_ment_via_colorama(f'{StateManagementUtil.UNDERLINE_PROMISED} {ment}', colorama_color=ColoramaUtil.LIGHTBLACK_EX)
+        DebuggingUtil.print_ment_light_black(f'{StateManagementUtil.UNDERLINE_PROMISED} {ment}')
         # self.speak(title) # 생각보다 너무 말이 많아 주석처리
         return f'{StateManagementUtil.UNDERLINE_PROMISED} {ment}'
-
-    @staticmethod
-    def debug_as_cli(context):  # deprecate 대기
-        # CODE FOR DEVELOPMENT
-        # DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-        # Park4139.debug_as_cli(inspect.currentframe().f_code)
-        # Park4139.debug_as_cli(f'{repr(context)} : {context}') # 이거 의도한 대로 안됨...
-
-        # DebuggingUtil.commentize("debug_as_cli")
-        print(context)
-
-        # CODE FOR PRODUCTION
-        pass
 
     # @staticmethod
     # 시작로깅(json 형태로 넣을 수 있도록 코드 업데이트 할것)
@@ -3148,14 +3155,14 @@ class FileSystemUtil:
             # read_html() 를 이용하면 손상된 파일을 열 수 ...
             DebuggingUtil.print_ment_yellow(f"확장자가 {FileSystemUtil.get_target_as_x(target_abspath)} 손상된 파일 같습니다. 복구를 시도합니다")
             df = pd.read_html(target_abspath, encoding='utf-8')
-            # DebuggingUtil.print_ment_blue(df)
-            # DebuggingUtil.print_ment_blue(df[0]) # 이번 데이터 구조의 특성상, 불필요 데이터
-            # DebuggingUtil.print_ment_blue(df[1]) # 이번 데이터 구조의 특성상, 불필요 데이터
-            # DebuggingUtil.print_ment_blue(df[2]) # 이번 데이터 구조의 특성상, 유효 데이터 , 데이터프레임 모든컬럼
-            # DebuggingUtil.print_ment_blue(df[2].get(0)) # 데이터프레임 첫번쨰컬럼
-            # DebuggingUtil.print_ment_blue(df[2].get(1)) # 데이터프레임 두번쨰컬럼
-            # DebuggingUtil.print_ment_blue(df[2].get(2)) #
-            # DebuggingUtil.print_ment_blue(df[2].get(6)) #
+            # DebuggingUtil.print_magenta(df)
+            # DebuggingUtil.print_magenta(df[0]) # 이번 데이터 구조의 특성상, 불필요 데이터
+            # DebuggingUtil.print_magenta(df[1]) # 이번 데이터 구조의 특성상, 불필요 데이터
+            # DebuggingUtil.print_magenta(df[2]) # 이번 데이터 구조의 특성상, 유효 데이터 , 데이터프레임 모든컬럼
+            # DebuggingUtil.print_magenta(df[2].get(0)) # 데이터프레임 첫번쨰컬럼
+            # DebuggingUtil.print_magenta(df[2].get(1)) # 데이터프레임 두번쨰컬럼
+            # DebuggingUtil.print_magenta(df[2].get(2)) #
+            # DebuggingUtil.print_magenta(df[2].get(6)) #
             # 이번 데이터에서 필요한 데이터, # 0 ~ 6 컬럼까지 유효
             df = df[2]  # 이번 데이터 구조의 특성상, 유효 데이터
             # df_selected = df[[0, 1, 2, 3, 4, 5, 6]]
@@ -3186,7 +3193,7 @@ class FileSystemUtil:
             # tables = soup.find_all("table")
             # table_selected = tables[2]  # 3번째 테이블 선택
             # df = pd.read_html(str(table_selected))[0]
-            # DebuggingUtil.print_ment_blue(df)
+            # DebuggingUtil.print_magenta(df)
 
         except Exception as e:
             DebuggingUtil.print_ment_fail(f"{function_name}(), fail, \n {traceback.format_exc()}")
@@ -3896,7 +3903,9 @@ class FileSystemUtil:
         DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         if not FileSystemUtil.is_os_windows():
             cmd = cmd.replace("\\", "/")
-        DebuggingUtil.print_ment_blue(rf'{cmd}')
+        else:
+            cmd = cmd.replace("/", "\\")
+        DebuggingUtil.print_magenta(rf'{cmd}')
         # os.Popen 으로 print 가능하도록 할 수 있다는 것 같았는데 다른 방식으로 일단 되니까. 안되면 시도.
         # cmd = ['dir', '/b']
         # fd_popen = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout # 명령어 실행 후 반환되는 결과를 파일에 저장합니다.
@@ -4074,7 +4083,7 @@ class FileSystemUtil:
                         shutil.move(src=target_abspath_with_timestamp, dst=dst)
                         DebuggingUtil.print_ment_via_colorama(ment=rf"파일이동성공", colorama_color=ColoramaUtil.LIGHTCYAN_EX)
                     except Exception:
-                        # traceback.print_exc()
+                        # traceback.print_exc(file=sys.stdout)
                         DebuggingUtil.print_ment_via_colorama(ment=rf"파일이동실패", colorama_color=ColoramaUtil.RED)
                 elif os.path.isdir(target_abspath):
                     try:
@@ -4082,7 +4091,7 @@ class FileSystemUtil:
                         shutil.move(src=target_abspath_with_timestamp, dst=dst)
                         DebuggingUtil.print_ment_via_colorama(ment=rf"디렉토리이동성공", colorama_color=ColoramaUtil.LIGHTCYAN_EX)
                     except Exception:
-                        # traceback.print_exc()
+                        # traceback.print_exc(file=sys.stdout)
                         DebuggingUtil.print_ment_via_colorama(ment=rf"디렉토리이동실패", colorama_color=ColoramaUtil.RED)
         except:
             DebuggingUtil.trouble_shoot("202312030021")
@@ -4358,15 +4367,16 @@ class TextToSpeechUtil:
         #         break
 
         # 바뀐 부분만 결과만 출력, 전체는 abspaths_and_mtimes 에 반영됨
-        print(rf'result_list : {result_list}')
-        print(rf'type(result_list) : {type(result_list)}')
-        print(rf'len(result_list) : {len(result_list)}')
+        # print(rf'result_list : {result_list}')
+        # print(rf'type(result_list) : {type(result_list)}')
+        # print(rf'len(result_list) : {len(result_list)}')
 
         if all(result_list):
-            print("쓰레드 작업결과 result_list의 모든 요소가 True이므로 True를 반환합니다")
+            # print("쓰레드 작업결과 result_list의 모든 요소가 True이므로 True를 반환합니다")
             return True
         else:
-            print("쓰레드 작업결과 result_list에 False인 요소가 있어 False를 반환합니다")
+            # print("쓰레드 작업결과 result_list에 False인 요소가 있어 False를 반환합니다")
+            return False  # 불필요시 주석
 
     @staticmethod
     def is_containing_jpn(text):
@@ -4558,11 +4568,11 @@ class TextToSpeechUtil:
                         cache_mp3 = rf'{StateManagementUtil.PROJECT_DIRECTORY}\$cache_mp3'
                         FileSystemUtil.make_leaf_directory(leaf_directory_abspath=cache_mp3)
 
-                        # DebuggingUtil.print_ment_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
+                        # DebuggingUtil.print_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
                         ment = BusinessLogicUtil.get_str_replaced_special_characters(target=ment, replacement=" ")
                         ment = ment.replace("\n", " ")
 
-                        # DebuggingUtil.print_ment_magenta(rf'파일 없으면 생성')
+                        # DebuggingUtil.print_magenta(rf'파일 없으면 생성')
                         ment__mp3 = rf'{cache_mp3}/{ment}_.mp3'
                         ment_mp3 = rf'{cache_mp3}/{ment}.mp3'
                         if not os.path.exists(ment_mp3):
@@ -4589,7 +4599,7 @@ class TextToSpeechUtil:
                             # 음악파일의 앞부분에 빈소리를 추가해주려고 한다. ffmpeg를 이용하여 silent.mp3(1초간 소리가 없는 mp3 파일)을 소리를 재생해야할 mp3 파일의 앞부분에 합쳐서 재생시도.
                             silent_mp3 = rf"{cache_mp3}\silent.mp3"
                             if not os.path.exists(silent_mp3):
-                                BusinessLogicUtil.debug("사일런트 mp3 파일이 없습니다")
+                                DebuggingUtil.print_magenta("사일런트 mp3 파일이 없습니다")
                                 break
                             if not os.path.exists(ment_mp3):
                                 cmd = rf'echo y | "ffmpeg" -i "concat:{os.path.abspath(silent_mp3)}|{os.path.abspath(ment__mp3)}" -acodec copy -metadata "title=Some Song" "{os.path.abspath(ment_mp3)}" -map_metadata 0:-1  >nul 2>&1'
@@ -4770,6 +4780,9 @@ class TextToSpeechUtil:
 
     @staticmethod
     def speak_ment(ment, sleep_after_play=1.00):  # 많이 쓸 수록 프로그램이 느려진다
+        # 무음 모드 적용
+        return
+
         DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         ment = str(ment)
         ment = ment.strip()
@@ -4789,11 +4802,11 @@ class TextToSpeechUtil:
                     cache_mp3 = rf'{StateManagementUtil.PROJECT_DIRECTORY}\$cache_mp3'
                     FileSystemUtil.make_leaf_directory(leaf_directory_abspath=cache_mp3)
 
-                    DebuggingUtil.print_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
+                    # DebuggingUtil.print_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
                     ment = BusinessLogicUtil.get_str_replaced_special_characters(target=ment, replacement=" ")
                     ment = ment.replace("\n", " ")
 
-                    DebuggingUtil.print_magenta(rf'파일 없으면 생성')
+                    # DebuggingUtil.print_magenta(rf'파일 없으면 생성')
                     ment__mp3 = rf'{cache_mp3}/{ment}_.mp3'
                     ment_mp3 = rf'{cache_mp3}/{ment}.mp3'
                     if not os.path.exists(ment_mp3):
@@ -4816,7 +4829,7 @@ class TextToSpeechUtil:
                     try:
                         silent_mp3 = rf"{cache_mp3}\silent.mp3"
                         if not os.path.exists(silent_mp3):
-                            BusinessLogicUtil.debug("사일런트 mp3 파일이 없습니다")
+                            DebuggingUtil.print_magenta("사일런트 mp3 파일이 없습니다")
                             break
                         if not os.path.exists(ment_mp3):
                             cmd = rf'echo y | "ffmpeg" -i "concat:{os.path.abspath(silent_mp3)}|{os.path.abspath(ment__mp3)}" -acodec copy -metadata "title=Some Song" "{os.path.abspath(ment_mp3)}" -map_metadata 0:-1  >nul 2>&1'
@@ -4884,11 +4897,11 @@ class TextToSpeechUtil:
                     cache_mp3 = rf'{StateManagementUtil.PROJECT_DIRECTORY}\$cache_mp3'
                     FileSystemUtil.make_leaf_directory(leaf_directory_abspath=cache_mp3)
 
-                    DebuggingUtil.print_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
+                    # DebuggingUtil.print_magenta("ment 전처리, 윈도우 경로명에 들어가면 안되는 문자들 공백으로 대체")
                     ment = BusinessLogicUtil.get_str_replaced_special_characters(target=ment, replacement=" ")
                     ment = ment.replace("\n", " ")
 
-                    DebuggingUtil.print_magenta(rf'파일 없으면 생성')
+                    # DebuggingUtil.print_magenta(rf'파일 없으면 생성')
                     ment__mp3 = rf'{cache_mp3}/{ment}_.mp3'
                     ment_mp3 = rf'{cache_mp3}/{ment}.mp3'
                     if not os.path.exists(ment_mp3):
@@ -4915,7 +4928,7 @@ class TextToSpeechUtil:
                         # 음악파일의 앞부분에 빈소리를 추가해주려고 한다. ffmpeg를 이용하여 silent.mp3(1초간 소리가 없는 mp3 파일)을 소리를 재생해야할 mp3 파일의 앞부분에 합쳐서 재생시도.
                         silent_mp3 = rf"{cache_mp3}\silent.mp3"
                         if not os.path.exists(silent_mp3):
-                            BusinessLogicUtil.debug("사일런트 mp3 파일이 없습니다")
+                            DebuggingUtil.print_magenta("사일런트 mp3 파일이 없습니다")
                             break
                         if not os.path.exists(ment_mp3):
                             cmd = rf'echo y | "ffmpeg" -i "concat:{os.path.abspath(silent_mp3)}|{os.path.abspath(ment__mp3)}" -acodec copy -metadata "title=Some Song" "{os.path.abspath(ment_mp3)}" -map_metadata 0:-1  >nul 2>&1'
@@ -5280,7 +5293,8 @@ class FastapiUtil:
         completed: bool
 
     class User(BaseModel):  # 여기에 validation 해두면 docs에서 post request 시 default 값 지정해 둘 수 있음.
-        id: str = uuid4().hex + TimeUtil.get_time_as_('%Y%m%d%H%M%S%f') + SecurityUtil.get_random_alphabet()  # 진짜id 는 이렇게 default 로 들어가게하고, 사용자 id 는 e-mail
+        # id: str = uuid4().hex + TimeUtil.get_time_as_('%Y%m%d%H%M%S%f') + SecurityUtil.get_random_alphabet()  # 진짜id 는 이렇게 default 로 들어가게하고, 사용자 id 는 e-mail
+        id: str
         pw: str
         name: str
         date_join: str = TimeUtil.get_time_as_('%Y-%m-%d %H:%M %S%f')
@@ -5368,6 +5382,7 @@ class FastapiUtil:
         position: Optional[str]
         company_address: Optional[str]
         birthday: Optional[str]
+        items: Optional[list]
 
 
 class UvicornUtil:
@@ -5375,11 +5390,11 @@ class UvicornUtil:
         # class 를 사용하면 tuple 로 오며, str(tuple) 이렇게 사용할 수 없고, tuple[0] 으로 가져와야 하네.
         # js 의 destructon 문법처럼 py의 unpacking 을 사용하는 방법이 있으나 변수 새로 생성해야함
         # 위의 생각은 틀렸다 잘못 코드를 작성한 것이다 , 가 문제 였다. 이 오류는 IDE 에서 알려주지 않는다.
-        protocol_type = "http" # success
+        protocol_type = "http"  # success
         # protocol_type =  "https"
         # host =  "0.0.0.0"
         host = "127.0.0.1"  # success , localhost
-        port = 8080 # success
+        port = 8080  # success
         url = f"{protocol_type}://{host}:{port}"
 
 
@@ -5534,13 +5549,13 @@ class MySqlUtil:
         protocol_type = "http"
         # db_driver = "mysql+mysqlconnector" # sqlalchemy mysql driver 설정 #  mysql-connector-python 라이브러리 에 의존
         db_driver = "mysql+pymysql"  # sqlalchemy 의 mysql driver 는 여러 개 built in 되어 있다. #  pymysql 라이브러리 에 의존
-        # host = "127.0.0.1"  # success, 로컬에서 실행 시 사용
-        # host = "localhost"  # success, 로컬에서 실행 시 사용
         # host = "doc"  # fail
-        # host = "www"  # fail # https://yes-admit.tistory.com/80
-        # host = "host.docker.internal" # success, 도커컨테이너 형태로 app 과 db를 설정한 경우. app 에서 db url의 host를  localhost로 호출을 하면 호출 을 할 수 없다, 도커컨테이너 간 네트워크 설정(win/linux/mac) linux 는 도커컨테이너를 실행할 때 --add-host host.docker.internal:host-gateway 옵션을 의존, 불편하다.
         # host = "docker_image_maker-db-1"  # fail, 도커컴포즈 로 생성되면 컨테이너명이 docker_image_maker-db-1 로 자동생성된다고 했는데 잘안됬음.
         # host = "db-1"  # fail,
+        # host = "www"  # fail # https://yes-admit.tistory.com/80
+        # host = "127.0.0.1"  # success, 로컬에서 실행 시 사용
+        # host = "localhost"  # success, 로컬에서 실행 시 사용
+        # host = "host.docker.internal" # success, 도커컨테이너 형태로 app 과 db를 설정한 경우. app 에서 db url의 host를  localhost로 호출을 하면 호출 을 할 수 없다, 도커컨테이너 간 네트워크 설정(win/linux/mac) linux 는 도커컨테이너를 실행할 때 --add-host host.docker.internal:host-gateway 옵션을 의존, 불편하다.
         host = "mysql_container" # success,  도커네트워크 를 도커컨테이너 간에 설정하면, 도커DNS 에 의해 도커컨테이너 명으로 동적 맵핑이 이뤄진다, fastapi 도커컨테이너 에서는 해당 DB의 도커컨테이너 명으로 찾아갈 것이다. 로컬에서 dveaber 로는 도커컨테이너 명으로 연결 안되었음, localhost 로 는 가능했음, 도커빌드 시에 사용.
         port = 3306
         id = "root"
@@ -5551,6 +5566,8 @@ class MySqlUtil:
 
     # Base 가 여기에서 설정되어야 동작
     engine = create_engine(Settings.uri)
+    # engine = create_engine(Settings.uri, poolclass=QueuePool, pool_size=100)
+    # engine = create_engine(Settings.uri, pool_timeout=60)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
 
@@ -5567,14 +5584,31 @@ class MySqlUtil:
         db = MySqlUtil.SessionLocal()
         return db
 
+
     @staticmethod
     def execute(native_query: str):  # without sqlarchemy
-        # engine = create_engine(Settings.url)
-        connection = MySqlUtil.engine.connect()
-        DebuggingUtil.print_ment_light_white(native_query)
-        result = connection.execute(sqlalchecdmy_text(native_query))
-        connection.close()
-        return result
+        try:
+            # engine = create_engine(Settings.url)
+            connection = MySqlUtil.engine.connect()
+            DebuggingUtil.print_ment_light_white(native_query)
+            result = connection.execute(sqlalchecdmy_text(native_query))
+            # connection.execute(text(native_query))  # 결과를 반환하지 않는 쿼리 실행
+            # from sqlalchemy import text
+            # result = connection.execute(text(native_query))
+            # return result
+            for word_reserved in ['truncate']:
+                if word_reserved not in native_query.lower():
+                    df = pd.DataFrame(result.fetchall(), columns=result.keys())
+                    # Result를 DataFrame으로 변환
+                    return df
+                else:
+                    DebuggingUtil.print_magenta(rf'''word_reserved : {word_reserved}''')
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
+        finally:
+            connection.close()
+
+
 
 
 class MemberUtil:
@@ -6639,6 +6673,368 @@ class CustomerServiceBoardUtil:
         return True
 
 
+class FinanceStockTickerUtil:
+    """
+    mysql / sqlalchemy / fastapi 의존하는 유틸리티 객체
+    """
+
+    class FinanceStockTicker(MySqlUtil.Base):  # orm 설정에는 id 있음
+        __tablename__ = "finance_stock_ticker"
+        __table_args__ = {'extend_existing': True}
+        # __table_args__ = {'extend_existing': True, 'mysql_collate': 'utf8_general_ci'} # encoding 안되면 비슷하게 방법을 알아보자  mysql 에 적용이 가능한 코드로 보인다.
+        FinanceStockTicker_id: str = uuid4().hex + TimeUtil.get_time_as_('%Y%m%d%H%M%S%f') + SecurityUtil.get_random_alphabet()  # table 내 unique id
+        id = Column(Integer, primary_key=True, autoincrement=True)  # index 로 이용
+        ticker = Column(VARCHAR(length=6))
+        stock_name = Column(VARCHAR(length=100))
+        market_name = Column(VARCHAR(length=13))
+        date_reg = Column(DateTime, nullable=False, default=datetime.now)
+        date_del = Column(DateTime, nullable=True)
+
+    class FinanceStockTickerBase(BaseModel):  # pydantic validator 설정에는 FinanceStockTicker_id 없음
+        id: str
+        ticker: str
+        stock_name: str
+        market_name: Optional[str]
+        date_reg: str
+        date_del: str
+
+        @staticmethod
+        @field_validator('id')
+        def validate_id(value):
+            FinanceStockTickerUtil.validate_id(value)
+
+        @staticmethod
+        @field_validator('ticker')
+        def validate_ticker(value):
+            FinanceStockTickerUtil.ticker(value)
+
+        @staticmethod
+        @field_validator('stock_name')
+        def validate_stock_name(value):
+            FinanceStockTickerUtil.validate_stock_name(value)
+
+        @staticmethod
+        @field_validator('market_name')
+        def validate_market_name(value):
+            FinanceStockTickerUtil.validate_market_name(value)
+
+        @staticmethod
+        @field_validator('date_reg')
+        def validate_date_reg(value):
+            # datetime.strptime(date_join, '%Y-%m-%d %H:%M %S%f')
+            if len(value) != 18:
+                raise HTTPException(status_code=400, detail="유효한 날짜가 아닙니다.")
+            FinanceStockTickerUtil.validate_date_reg(value)
+
+        @staticmethod
+        @field_validator('date_del')
+        def validate_date_del(value):
+            FinanceStockTickerUtil.validate_date_del(value)
+
+    @staticmethod
+    def get_finance_stock_ticker_validated(finance_stock_ticker):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+
+        # FinanceStockTicker 클래스의 필드 개수 확인
+        field_count = len(FinanceStockTickerUtil.FinanceStockTicker.__table__.c)
+        print(rf'''field_count : {field_count}''')
+
+        targets_validated = [
+            {"field_en": 'id', "field_ko": "아이디", "field_validation_func": FinanceStockTickerUtil.validate_id, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.id.type.length},
+            {"field_en": 'ticker', "field_ko": "티커", "field_validation_func": FinanceStockTickerUtil.validate_ticker, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.ticker.type.length},
+            {"field_en": 'stock_name', "field_ko": "주식명", "field_validation_func": FinanceStockTickerUtil.validate_stock_name, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.stock_name.type.length},
+            {"field_en": 'market_name', "field_ko": "주식시장명", "field_validation_func": FinanceStockTickerUtil.validate_market_name, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.market_name.type.length},
+            {"field_en": 'date_reg', "field_ko": "등록일", "field_validation_func": FinanceStockTickerUtil.validate_date_reg, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.date_reg.type.length},
+            {"field_en": 'date_del', "field_ko": "삭제일", "field_validation_func": FinanceStockTickerUtil.validate_date_del, "field_length_limit": FinanceStockTickerUtil.FinanceStockTicker.__table__.c.date_del.type.length},
+        ]
+        for target in targets_validated:
+            field_en = target["field_en"]
+            field_ko = target["field_ko"]
+            field_validation_func = target["field_validation_func"]
+            field_length_limit = target["field_length_limit"]
+            if len(finance_stock_ticker[field_en]) > target['field_length_limit']:
+                raise HTTPException(status_code=400, detail=f"{field_ko}({field_en})의 길이제한은 {field_length_limit}자 이하여야 합니다.")
+            else:
+                field_validation_func(finance_stock_ticker[field_en])  # success, 호출할 수 없는 함수의 내부에 구현된 부분이 필요한것 이므로 내부에 구현된 것을 다른 클래스에 구현해서 참조하도록 로직 분리,
+        return finance_stock_ticker
+
+    @staticmethod
+    def validate_finance_stock_ticker(finance_stock_ticker):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        FinanceStockTickerUtil.get_finance_stock_ticker_validated(finance_stock_ticker)
+
+    class FinanceStockTickerCreate(FinanceStockTickerBase):
+        pass
+
+    class FinanceStockTickerExtendedFinanceStockTickerBase(FinanceStockTickerBase):
+        id: str
+        ticker: str
+        stock_name: str
+        market_name: str
+        date_reg: str
+        date_del: str
+
+        class Config:
+            from_attributes = True
+
+    @staticmethod
+    def get_finance_stock_tickers(db: Session):
+        # db_data = MySqlUtil.execute(f'''SELECT * FROM finance_stock_ticker;''')
+        db_data = db.query(FinanceStockTickerUtil.FinanceStockTicker).all()
+        db.close()
+        return db_data
+
+    @staticmethod
+    def get_finance_stock_ticker(id: int, db: Session):
+        # db_data = MySqlUtil.execute(f'''SELECT * FROM finance_stock_ticker where id= {id} ORDER BY del_yn LIMIT 4;''')
+        db_data = db.query(FinanceStockTickerUtil.FinanceStockTicker).filter_by(id=id).limit(4).all()
+        db.close()
+        return db_data
+
+    @staticmethod
+    def insert_finance_stock_ticker(finance_stock_ticker, db: Session):
+        # db_data = MySqlUtil.execute(f'''insert into finance_stock_ticker () values () as new on duplicate key update ~~~~~~~~~ ;''')
+        finances_tockt_icker_ = FinanceStockTickerUtil.FinanceStockTicker(**finance_stock_ticker)
+        db.add(finances_tockt_icker_)
+        db.flush()  # flush() 메서드 없이 바로 commit() 메서드를 호출하면, 롤백할 수 있는 포인트가 만들어지지 않습니다. (# 나중에 롤백을 수행할 수 있는 포인트가 만들어짐)
+        db.commit()
+        db.refresh(finances_tockt_icker_)  # 데이터베이스에 업데이트된 최신내용을 세션에 가져오는 것.
+        db.close()
+
+    @staticmethod
+    def update_finance_stock_ticker(finance_stock_ticker, updated_finance_stock_ticker, db: Session):
+        # db_data = MySqlUtil.execute(f'''update ~;''')
+        for key, value in updated_finance_stock_ticker.model_dump().finances_tockt_ickers():
+            setattr(finance_stock_ticker, key, value)
+        db.commit()
+        db.refresh(finance_stock_ticker)
+        db.close()
+        return finance_stock_ticker
+
+    @staticmethod
+    def delete_finance_stock_ticker(finance_stock_ticker, db: Session):
+        # db_data = MySqlUtil.execute(f'''delete ~;''')
+        db.delete(finance_stock_ticker)
+        db.commit()
+        db.close()
+
+    @staticmethod
+    def validate_id(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        BusinessLogicUtil.raise_exception_after_special_charcater_check(value, inspect.currentframe().f_code.co_name)
+        return True
+
+    @staticmethod
+    def validate_ticker(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        BusinessLogicUtil.raise_exception_after_special_charcater_check(value, inspect.currentframe().f_code.co_name)
+        return True
+
+    @staticmethod
+    def validate_stock_name(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        BusinessLogicUtil.raise_exception_after_special_charcater_check(value, inspect.currentframe().f_code.co_name, ignore_list=["@"])
+        FinanceStockTickerUtil.validate_stock_name(value)
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(pattern, value):
+            # if not date_reg_stock_name.endswith('@kakao.com'):
+            #     raise HTTPException(status_code=400, detail="유효한 카카오 이메일이 아닙니다.")
+            # return date_reg_stock_name
+            raise HTTPException(status_code=400, detail=f"유효한 이메일 주소가 아닙니다. {value}")
+        return value
+
+    @staticmethod
+    def validate_market_name(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        # r'^\d{3}-\d{3,4}-\d{4}$'
+        # r'^\d{2}-\d{3,4}-\d{4}$' 둘다
+        if not re.match(r'^\d{2,3}-\d{3,4}-\d{4}$', value):
+            raise HTTPException(status_code=400, detail=f"유효한 전화번호가 아닙니다. {value}")
+        return value
+
+    @staticmethod
+    def validate_date_reg(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        return True
+
+    @staticmethod
+    def validate_date_del(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        return True
+
+
+class StockInfoUtil:
+    """
+    mysql / sqlalchemy / fastapi 의존하는 유틸리티 객체
+    """
+
+    class StockInfo(MySqlUtil.Base):  # orm 설정에는 id 있음
+        __tablename__ = "stock_info"
+        __table_args__ = {'extend_existing': True}
+        # __table_args__ = {'extend_existing': True, 'mysql_collate': 'utf8_general_ci'} # encoding 안되면 비슷하게 방법을 알아보자  mysql 에 적용이 가능한 코드로 보인다.
+        StockInfo_id: str = uuid4().hex + TimeUtil.get_time_as_('%Y%m%d%H%M%S%f') + SecurityUtil.get_random_alphabet()  # table 내 unique id
+        id = Column(Integer, primary_key=True, autoincrement=True)  # index 로 이용
+        date = Column(DateTime, nullable=False)
+        open = Column(Integer)
+        high = Column(Integer)
+        low = Column(Integer)
+        close = Column(Integer)
+        volume = Column(Integer)
+        ticker = Column(VARCHAR(length=6))
+        date_reg = Column(DateTime, nullable=False, default=datetime.now)
+        date_del = Column(DateTime, nullable=True)
+
+    class StockInfoBase(BaseModel):  # pydantic validator 설정에는 StockInfo_id 없음
+        id: str
+        date: str
+        open: int
+        high: int
+        low: int
+        close: int
+        volume: int
+        ticker: str
+        date_reg: str
+        date_del: str
+
+        @staticmethod
+        @field_validator('id')
+        def validate_id(value):
+            StockInfoUtil.validate_id(value)
+
+        @staticmethod
+        @field_validator('date_reg')
+        def validate_date_reg(value):
+            # datetime.strptime(date_join, '%Y-%m-%d %H:%M %S%f')
+            if len(value) != 18:
+                raise HTTPException(status_code=400, detail="유효한 날짜가 아닙니다.")
+            StockInfoUtil.validate_date_reg(value)
+
+    @staticmethod
+    def get_stock_info_validated(stock_info):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+
+        # StockInfo 클래스의 필드 개수 확인
+        field_count = len(StockInfoUtil.StockInfo.__table__.c)
+        print(rf'''field_count : {field_count}''')
+
+
+
+        targets_validated = [
+            {"field_en": 'id', "field_ko": "아이디", "field_validation_func": StockInfoUtil.validate_id, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.id.type.length},
+            {"field_en": 'date', "field_ko": "날짜", "field_validation_func": StockInfoUtil.validate_date_reg, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.date.type.length},
+            {"field_en": 'open', "field_ko": "시가", "field_validation_func": StockInfoUtil.validate_open, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.open.type.length},
+            {"field_en": 'high', "field_ko": "고가", "field_validation_func": StockInfoUtil.validate_high, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.high.type.length},
+            {"field_en": 'low', "field_ko": "저가", "field_validation_func": StockInfoUtil.validate_low, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.low.type.length},
+            {"field_en": 'close', "field_ko": "종가", "field_validation_func": StockInfoUtil.validate_low, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.close.type.length},
+            {"field_en": 'volume', "field_ko": "거래량", "field_validation_func": StockInfoUtil.validate_low, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.volume.type.length},
+            {"field_en": 'ticker', "field_ko": "종목코드", "field_validation_func": StockInfoUtil.validate_date_reg, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.ticker.type.length},
+            {"field_en": 'date_reg', "field_ko": "등록일", "field_validation_func": StockInfoUtil.validate_date_reg, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.date_reg.type.length},
+            {"field_en": 'date_del', "field_ko": "삭제일", "field_validation_func": StockInfoUtil.validate_date_del, "field_length_limit": StockInfoUtil.StockInfo.__table__.c.date_del.type.length},
+        ]
+        for target in targets_validated:
+            field_en = target["field_en"]
+            field_ko = target["field_ko"]
+            field_validation_func = target["field_validation_func"]
+            field_length_limit = target["field_length_limit"]
+            if len(stock_info[field_en]) > target['field_length_limit']:
+                raise HTTPException(status_code=400, detail=f"{field_ko}({field_en})의 길이제한은 {field_length_limit}자 이하여야 합니다.")
+            else:
+                field_validation_func(stock_info[field_en])  # success, 호출할 수 없는 함수의 내부에 구현된 부분이 필요한것 이므로 내부에 구현된 것을 다른 클래스에 구현해서 참조하도록 로직 분리,
+        return stock_info
+
+    @staticmethod
+    def validate_stock_info(stock_info):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        StockInfoUtil.get_stock_info_validated(stock_info)
+
+    class StockInfoCreate(StockInfoBase):
+        pass
+
+    class StockInfoExtendedStockInfoBase(StockInfoBase):
+        id: str
+        date: str
+        open: int
+        high: int
+        low: int
+        close: int
+        volume: int
+        ticker: str
+        date_reg: str
+        date_del: str
+
+        class Config:
+            from_attributes = True
+
+    @staticmethod
+    def get_stock_infos(db: Session):
+        # db_data = MySqlUtil.execute(f'''SELECT * FROM stock_info;''')
+        db_data = db.query(StockInfoUtil.StockInfo).all()
+        db.close()
+        return db_data
+
+    @staticmethod
+    def get_stock_info(id: int, db: Session):
+        # db_data = MySqlUtil.execute(f'''SELECT * FROM stock_info where id= {id} ORDER BY del_yn LIMIT 4;''')
+        db_data = db.query(StockInfoUtil.StockInfo).filter_by(id=id).limit(4).all()
+        db.close()
+        return db_data
+
+    @staticmethod
+    def insert_stock_info(stock_info, db: Session):
+        # db_data = MySqlUtil.execute(f'''insert into stock_info () values () as new on duplicate key update ~~~~~~~~~ ;''')
+        stock_info_ = StockInfoUtil.StockInfo(**stock_info)
+        db.add(stock_info_)
+        db.flush()  # flush() 메서드 없이 바로 commit() 메서드를 호출하면, 롤백할 수 있는 포인트가 만들어지지 않습니다. (# 나중에 롤백을 수행할 수 있는 포인트가 만들어짐)
+        db.commit()
+        db.refresh(stock_info_)  # 데이터베이스에 업데이트된 최신내용을 세션에 가져오는 것.
+        db.close()
+
+    @staticmethod
+    def insert_stock_infos(stock_infos, db: Session):
+        model = StockInfoUtil.StockInfo
+        db.bulk_insert_mappings(model, stock_infos)
+        db.flush()  # flush() 메서드 없이 바로 commit() 메서드를 호출하면, 롤백할 수 있는 포인트가 만들어지지 않습니다. (# 나중에 롤백을 수행할 수 있는 포인트가 만들어짐)
+        db.commit()
+        db.refresh(model)  # 데이터베이스에 업데이트된 최신내용을 세션에 가져오는 것.
+        db.close()
+
+    @staticmethod
+    def update_stock_info(stock_info, updated_stock_info, db: Session):
+        # db_data = MySqlUtil.execute(f'''update ~;''')
+        for key, value in updated_stock_info.model_dump().stock_infos():
+            setattr(stock_info, key, value)
+        db.commit()
+        db.refresh(stock_info)
+        db.close()
+        return stock_info
+
+    @staticmethod
+    def delete_stock_info(stock_info, db: Session):
+        # db_data = MySqlUtil.execute(f'''delete ~;''')
+        db.delete(stock_info)
+        db.commit()
+        db.close()
+
+
+
+    @staticmethod
+    def validate_id(value):
+        function_name = inspect.currentframe().f_code.co_name
+        DebuggingUtil.commentize(f"{function_name}()")
+        BusinessLogicUtil.raise_exception_after_special_charcater_check(value, inspect.currentframe().f_code.co_name)
+        return True
+
+
 class BusinessLogicUtil:
 
     @staticmethod
@@ -7477,7 +7873,7 @@ class BusinessLogicUtil:
     #         BusinessLogicUtil.should_i_do(ment=ment, function=BusinessLogicUtil.back_up_project_and_change_to_power_saving_mode(), auto_click_negative_btn_after_seconds=20)
 
     @staticmethod
-    def sleep(milliseconds=None, sec=None, min=None, hour=None, printing_mode=True):
+    def sleep(milliseconds=None, sec=None, min=None, hour=None, print_mode=True):
         # DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         params_list = [milliseconds, sec, min, hour]
         # 리스트 내 요소가 3개만 None 인지 확인
@@ -7486,19 +7882,19 @@ class BusinessLogicUtil:
             time_to_sleep = None
             if milliseconds is not None:
                 seconds = milliseconds / 1000
-                if printing_mode:
+                if print_mode:
                     DebuggingUtil.print_ment_via_colorama(f"{inspect.currentframe().f_code.co_name}(ms={milliseconds})", colorama_color=ColoramaUtil.WHITE)
                 time_to_sleep = seconds
             elif sec is not None:
-                if printing_mode:
+                if print_mode:
                     DebuggingUtil.print_ment_via_colorama(f"{inspect.currentframe().f_code.co_name}(seconds={sec})", colorama_color=ColoramaUtil.WHITE)
                 time_to_sleep = sec
             elif min is not None:
-                if printing_mode:
+                if print_mode:
                     DebuggingUtil.print_ment_via_colorama(f"{inspect.currentframe().f_code.co_name}(minutes={min})", colorama_color=ColoramaUtil.WHITE)
                 time_to_sleep = 60 * min
             elif hour is not None:
-                if printing_mode:
+                if print_mode:
                     DebuggingUtil.print_ment_via_colorama(f"{inspect.currentframe().f_code.co_name}(hours={hour})", colorama_color=ColoramaUtil.WHITE)
                 time_to_sleep = 60 * 60 * hour
             if time_to_sleep is not None:
@@ -7824,7 +8220,7 @@ class BusinessLogicUtil:
         """
         query = urllib_parser.urlparse(url=url)
         if query.hostname == 'youtu.be':
-            # DebuggingUtil.print_ment_magenta()(f"query.path[1:] : {query.path[1:]}")
+            # DebuggingUtil.print_magenta()(f"query.path[1:] : {query.path[1:]}")
             return query.path[1:]
         if query.hostname in ('www.youtube.com', 'youtube.com'):
             # Park4139.debug_as_cli(query.scheme)
@@ -7836,13 +8232,13 @@ class BusinessLogicUtil:
             # Park4139.debug_as_cli(query["v"][0])
             if query.path == '/watch':
                 p = urllib_parser.parse_qs(query.query)
-                # DebuggingUtil.print_ment_magenta()(f"p['v'][0] : {p['v'][0]}")
+                # DebuggingUtil.print_magenta()(f"p['v'][0] : {p['v'][0]}")
                 return p['v'][0]
             if query.path[:7] == '/embed/':
-                # DebuggingUtil.print_ment_magenta()(f"query.path.split('/')[2] : {query.path.split('/')[2]}")
+                # DebuggingUtil.print_magenta()(f"query.path.split('/')[2] : {query.path.split('/')[2]}")
                 return query.path.split('/')[2]
             if query.path[:3] == '/v/':
-                # DebuggingUtil.print_ment_magenta()(f"query.path.split('/')[2] : {query.path.split('/')[2]}")
+                # DebuggingUtil.print_magenta()(f"query.path.split('/')[2] : {query.path.split('/')[2]}")
                 return query.path.split('/')[2]
 
     # @staticmethod
@@ -9058,7 +9454,7 @@ class BusinessLogicUtil:
     #             # setting_for_proxy = setting_for_proxy  + f"languages : {driver.find_element(By.CSS_SELECTOR, '#languages').text}\n"
     #             # setting_for_proxy = setting_for_proxy  + f"webgl_vendor : {driver.find_element(By.CSS_SELECTOR, '#webgl-vendor').text}\n"
     #             # setting_for_proxy = setting_for_proxy  + f"webgl_renderer : {driver.find_element(By.CSS_SELECTOR, '#webgl-renderer').text}\n"
-    #             # Park4139.debug_as_gui(context=setting_for_proxy, is_app_instance_mode=False)
+    #             # print(context=setting_for_proxy, is_app_instance_mode=False)
     #
     #             # 필요할까?
     #             # driver.implicitly_wait(2)
@@ -9068,8 +9464,8 @@ class BusinessLogicUtil:
     #             DebuggingUtil.commentize("페이지 소스 RAW")
     #             page_src = driver.page_source
     #             DebuggingUtil.print_magenta(page_src)
-    #             # Park4139.debug_as_gui(context=f"\n{page_src}")
-    #             # Park4139.debug_as_gui(context=f"페이지 소스 RAW:\n\n{page_src}")
+    #             # print(context=f"\n{page_src}")
+    #             # print(context=f"페이지 소스 RAW:\n\n{page_src}")
     #
     #             DebuggingUtil.commentize("web parser 설정")
     #             # soup = BeautifulSoup(page_src, "html5lib")
@@ -9258,7 +9654,7 @@ class BusinessLogicUtil:
         # dialog.exec()
         # btn_text_clicked = dialog.btn_text_clicked
         # if btn_text_clicked == "":
-        #     DebuggingUtil.print_ment_magenta()(f'누르신 버튼은 {btn_text_clicked} 입니다')
+        #     DebuggingUtil.print_magenta()(f'누르신 버튼은 {btn_text_clicked} 입니다')
         # if is_app_instance_mode == True:
         #     if isinstance(app_foo, QApplication):
         #         app_foo.exec()
@@ -9270,7 +9666,7 @@ class BusinessLogicUtil:
         #     app_foo.shutdown()  # QApplication 인스턴스 파괴시도 : success  # 성공요인은 app.shutdown()이 호출이 되면서 메모리를 해제까지 수행해주기 때문
         #     # sys.exit()
         # # return app_foo
-        DebuggingUtil.print_ment_via_colorama(traceback.print_exc(), colorama_color=ColoramaUtil.RED)
+        DebuggingUtil.print_ment_via_colorama(traceback.print_exc(file=sys.stdout), colorama_color=ColoramaUtil.RED)
         # traceback.print_exc(file=sys.stdout)
         # if FileSystemUtil.is_os_windows():
         #     UiUtil.pop_up_as_complete(title_="디버깅결과보고", ment=context, input_text_default=input_text_default, auto_click_positive_btn_after_seconds=auto_click_positive_btn_after_seconds)
@@ -9351,7 +9747,7 @@ class BusinessLogicUtil:
     #             # open cv 설치했는데 적용안되고 있음. 재부팅도 하였는 데도 안됨.
     #             # pycharm 에서 import 하는 부분에서 cv2 설치 시도 중에 옵션으로 opencv-python 이 있길래 설치했더니 결국 됨. 혹쉬 경로 설정 필요했나?
     #             # xy_infos_of_imgs = pyautogui.locateOnScreen(img_abspath, confidence=0.7, grayscale=True)
-    #             # Park4139.debug_as_gui(xy_infos_of_imgs == None)
+    #             # print(xy_infos_of_imgs == None)
     #             DebuggingUtil.commentize("화면 이미지 인식 시도 중...")
     #             loop_cnt = loop_cnt + 1
     #             try:
@@ -9760,7 +10156,7 @@ class BusinessLogicUtil:
     #     DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
     #     import psutil  # 실행중인 프로세스 및 시스템 활용 라이브러리
     #     if not str(pid).isdigit():
-    #         BusinessLogicUtil.debug(f"pid 분석결과 숫자가 아닌 것으로 판단됨 \n\n{pid}")
+    #         DebuggingUtil.print_magenta(f"pid 분석결과 숫자가 아닌 것으로 판단됨 \n\n{pid}")
     #     pid = int(pid)
     #     try:
     #         process = psutil.Process(pid)
@@ -9782,11 +10178,11 @@ class BusinessLogicUtil:
     #     DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
     #     # Q.how to activate certain program window at python?
     #     pids: str = BusinessLogicUtil.get_all_pid_and_process_name()
-    #     # Park4139.debug_as_gui(f"pids:\n\n{pids}")
+    #     # print(f"pids:\n\n{pids}")
     #     pids: list[str] = [i for i in pids.split("\n") if BusinessLogicUtil.is_regex_in_contents_with_case_ignored(contents=i, regex=target_process_name)]  # 프로세스명이 target_process_name 인 경우만 추출
     #     pids: str = pids[0].split(",")[1].replace("pid:", "").strip()  # strip() 은 특정 문자를 제거를 위해서 만들어짐. 단어를 제거하기 위해서는 replace() 가 더 적절하다고 chatGPT 는 말한다.
     #     target_pid = int(pids)  # 추출된 target_process_name 의 pid
-    #     BusinessLogicUtil.debug(f"target_process_name 프로세스 정보\n\n{target_pid}")
+    #     DebuggingUtil.print_magenta(f"target_process_name 프로세스 정보\n\n{target_pid}")
     #     return target_pid
 
     @staticmethod
@@ -9794,7 +10190,7 @@ class BusinessLogicUtil:
         DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         while True:
             pids = FileSystemUtil.get_cmd_output(f"tasklist | findstr {target_process_name}")
-            # Park4139.debug_as_gui(f"pids:\n\n{pids}")
+            # print(f"pids:\n\n{pids}")
             cnts: [int] = []
             for i in pids:
                 cnts.append(i.count(" "))  # str 내의 특정문자의 개수를 cnts에 저장
@@ -9855,7 +10251,7 @@ class BusinessLogicUtil:
         # text_translated = translater.translate([text_eng.split(".")], dest='ko')
         # for translation in text_translated:
         #     print(translation.origin, ' -> ', translation.text)
-        # Park4139.debug_as_gui(context=text_translated, is_app_instance_mode=True)
+        # print(context=text_translated, is_app_instance_mode=True)
 
         # from papago_translate import Translator
         # naver papago api 서비스는 2024 년 종료가 된다...
@@ -9892,7 +10288,7 @@ class BusinessLogicUtil:
         DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
         translator = Translator()
         text_translated = translator.translate(str(request), src='ko', dest='en')
-        BusinessLogicUtil.debug(context=text_translated, is_app_instance_mode=True)
+        DebuggingUtil.print_magenta(context=text_translated, is_app_instance_mode=True)
 
     # @staticmethod
     # def keyDown(key: str):
@@ -9944,267 +10340,6 @@ class BusinessLogicUtil:
             return "일"
         else:
             return None
-
-    # @staticmethod
-    # def get_comprehensive_weather_information_from_web():
-    #     DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #     try:
-    #         while 1:
-    #             title = ""
-    #             ment_about_naver_weather = ''
-    #             results_about_naver_weather = ''
-    #             results_about_nationwide_ultrafine_dust = ''
-    #             ment_about_geo = ''
-    #             results_about_geo = ''
-    #             ment_about_pm_ranking = ''
-    #             results_about_pm_ranking = ''
-    #
-    #             # answer = "tate no"
-    #             # DebuggingUtil.commentize(f"{btn_text_clicked} 입력되었습니다")
-    #             # Park4139.debug_as_cli(btn_text_clicked)
-    #             # special_prefixes = " ".join(["subsplease", "1080"]) + " "
-    #             # special_prefixes = " "
-    #             # query = urllib.parse.quote(f"{special_prefixes}{btn_text_clicked}")
-    #             # if query == "":
-    #             #     Park4139Park4139.Tts.speak(  ment = "아무것도 입력되지 않았습니다")
-    #             #     break
-    #             # url = f'https://nyaa.si/?f=0&c=0_0&q={query}'
-    #
-    #             # selenium way
-    #             # DebuggingUtil.commentize("페이지 소스 중간 분석결과")
-    #             # page_src = driver.page_source
-    #             # soup = BeautifulSoup(page_src, "lxml")
-    #             # selenium 으로 하면 선택은 깔끔한데, html 구조를 보는 방법을 아직 모르겠다. #selenium 자체 파서를 사용하는 방법이지 않을까 싶다
-    #             # results = driver.find_element(By.XPATH, '//*[@id="body_main"]/table[2]')
-    #             # Park4139.debug_as_cli(results.text)
-    #
-    #             async def crawl_pm_ranking():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 driver = None
-    #                 try:
-    #                     driver = SeleniumUtil.get_driver_for_selenium()
-    #                     # 미세먼지랭킹 bs4 way
-    #                     DebuggingUtil.commentize("페이지 TARGET URL RAW 소스 분석중")
-    #                     ment = '미세먼지랭킹 웹사이트 크롤링 결과'
-    #                     global ment_about_pm_ranking
-    #                     ment_about_pm_ranking = ment
-    #                     target_url = f'https://www.dustrank.com/air/air_dong_detail.php?addcode=41173103'
-    #                     DebuggingUtil.print_magenta(target_url)
-    #                     driver.get(target_url)
-    #                     page_src = driver.page_source
-    #                     soup = BeautifulSoup(page_src, "lxml")
-    #                     # results = soup.find_all(href=re.compile("magnet"), id='link1') # <a class="sister" href="http://example.com/magnet" id="link1">Elsie</a>
-    #                     results = soup.find_all("table", class_="datatable")  # <table class="datatable">foo!</div>
-    #                     soup = BeautifulSoup(str(results), "lxml")
-    #                     results = soup.find_all("table")[-1]
-    #                     soup = BeautifulSoup(str(results), "lxml")
-    #                     results = soup.find_all("table")[-1].text
-    #                     results = results.split("\n")  # 리스트
-    #                     results = [x for x in results if x.strip()]
-    #                     results = [x for x in results if x.strip(",")]  # 리스트 요소 "," 제거
-    #                     # results = [x + '\n' for x in results] #리스트 요소마다 \n prefix 로서 추가
-    #                     head_1 = results[1]
-    #                     head_2 = results[2]
-    #                     # body = results[3]+'\n'*10
-    #                     # body = re.split(r"[,!?]", results[3]) #, !, ? 이면 쪼개기
-    #                     # pattern = r'\d{2}-\d{2}-\d{2} \d{2}:\d{2}[가-힣]+\(\d+\)[가-힣]+\(\d+\)'
-    #                     pattern = r'(\d{2}-\d{2}-\d{2} \d{2}:\d{2})([가-힣]+\(\d+\))([가-힣]+\(\d+\))'  # 정규식을 () 로 부분 부분 묶으면 tuple 형태로 수집할 수 있다.
-    #                     body = re.findall(pattern, results[3])
-    #                     body = list(body)  # tuple to list
-    #                     body = [list(item) for item in body]  # LIST 내 ITEM 이 TUPLE 일 때 ITEM 을 LIST 로 변환 #의도대로 잘 변했으~
-    #
-    #                     # 리스트 요소를 3개 단위로 개행하여 str 에 저장
-    #                     body_ = ""
-    #                     for i in range(0, len(body), 1):
-    #                         body_ = body_ + body[i][0] + body[i][1] + body[i][2] + "\n"
-    #                     body = body_
-    #                     # body = "\n".join(body) # list to str
-    #                     results = f"{head_1}\t{head_2}\n{body}"
-    #
-    #                     global results_about_pm_ranking
-    #                     results_about_pm_ranking = results
-    #                     DebuggingUtil.print_magenta(f"async def {inspect.currentframe().f_code.co_name}() is done...")
-    #                     DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 except:
-    #                     DebuggingUtil.trouble_shoot("%%%FOO%%%")
-    #                     # driver.close()
-    #                     driver.quit()
-    #
-    #             async def crawl_nationwide_ultrafine_dust():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 driver = SeleniumUtil.get_driver_for_selenium()
-    #
-    #                 # # '전국초미세먼지'(bs4 way)
-    #                 DebuggingUtil.commentize("페이지 TARGET URL RAW 소스 분석중")
-    #                 ment = '전국초미세먼지  크롤링 결과'
-    #                 global title
-    #                 title = ment
-    #                 target_url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=전국초미세먼지'
-    #                 DebuggingUtil.print_magenta(target_url)
-    #                 driver.get(target_url)
-    #                 page_src = driver.page_source
-    #                 soup = BeautifulSoup(page_src, "lxml")
-    #                 results: any
-    #                 # results = soup.find_all("body")
-    #                 results: ResultSet = soup.find_all("div", class_="detail_box")
-    #                 results: str = results[0].text
-    #                 results: str = results.replace("지역별 초미세먼지 정보", "")
-    #                 results: str = results.replace("관측지점 현재 오전예보 오후예보", "")
-    #                 results: str = results.replace("", "")
-    #                 results___: [str] = results.split(" ")
-    #                 results___: [str] = [x for x in results___ if x.strip(" ") and x.strip("") and x.strip("\"") and x.strip("\'") and x.strip("\'\'")]  # 불필요 리스트 요소 제거 ( "" , "\"", " " ...)
-    #
-    #                 # 리스트 요소를 4개 단위로 개행하여 str 에 저장
-    #                 results_: str = ""
-    #                 for i in range(0, len(results___), 4):
-    #                     if i == len(results___):
-    #                         pass
-    #                     results_ = f"{results_}\t{results___[i]}\t{results___[i + 1]}\t{results___[i + 2]}\t{results___[i + 3]}\n"
-    #                 results___ = results_
-    #                 global results_about_nationwide_ultrafine_dust
-    #                 results_about_nationwide_ultrafine_dust = results___
-    #                 DebuggingUtil.print_magenta(f"async def {inspect.currentframe().f_code.co_name}() is done...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #
-    #             async def crawl_naver_weather():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 driver = SeleniumUtil.get_driver_for_selenium()
-    #                 # '동안구 관양동 날씨 정보'(bs4 way)
-    #                 DebuggingUtil.commentize("페이지 TARGET URL RAW 소스 분석중")
-    #                 ment = '네이버 동안구 관양동 날씨 크롤링 결과'
-    #
-    #                 global ment_about_naver_weather
-    #                 ment_about_naver_weather = ment
-    #                 target_url = 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=동안구+관양동+날씨'
-    #                 DebuggingUtil.print_magenta(target_url)
-    #                 driver.get(target_url)
-    #                 page_src = driver.page_source
-    #                 soup = BeautifulSoup(page_src, "lxml")
-    #                 results: ResultSet = soup.find_all("div", class_="status_wrap")
-    #                 results: str = results[0].text
-    #                 # 리스트 요소 변경
-    #                 results: str = results.replace("오늘의 날씨", "오늘의날씨")
-    #                 results: str = results.replace(" 낮아요", "낮아요")
-    #                 results: str = results.replace(" 높아요", "높아요")
-    #                 results: str = results.replace(" 체감", "체감온도")
-    #                 results_refactored = results.split(" ")
-    #                 results_refactored: [str] = [x for x in results_refactored if x.strip(" ") and x.strip("") and x.strip("\"") and x.strip("\'") and x.strip("\'\'")]  # 불필요 리스트 요소 제거 ( "" , "\"", " " ...)
-    #                 results_refactored: [str] = [x for x in results_refactored if x.strip("현재")]  # 리스트 요소 "오늘의"
-    #                 # 리스트 내 특정문자와 동일한 요소의 바로 뒷 요소를 가져와 딕셔너리에 저장 # 데이터의 key, value 형태가 존재하면서 순번이 key 다음 value 형태로 잘 나오는 경우 사용.
-    #                 keys_predicted = ['온도', '체감온도', '습도', '서풍', '동풍', '남풍', '북풍', '북서풍', '미세먼지', '초미세먼지', '자외선', '일출', '오늘의날씨']
-    #                 results_: dict = {}
-    #                 for i in range(len(results_refactored) - 1):
-    #                     for key_predicted in keys_predicted:
-    #                         if results_refactored[i] == key_predicted:
-    #                             key = results_refactored[i]
-    #                             value = results_refactored[i + 1]
-    #                             results_[key] = value
-    #                 results_refactored = results_
-    #
-    #                 # results: [str] = str(results_)  # dict to str (개행을 시키지 않은)
-    #
-    #                 results: str = "\n".join([f"{key}: {value}" for key, value in results_refactored.items()])  # dict to str (개행을 시킨)
-    #
-    #                 global results_about_naver_weather
-    #                 results_about_naver_weather = results
-    #                 DebuggingUtil.print_magenta(f"async def {inspect.currentframe().f_code.co_name}() is done...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #
-    #             async def crawl_geo_info():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 # '지역 정보'(bs4 way)
-    #                 driver = SeleniumUtil.get_driver_for_selenium()
-    #                 DebuggingUtil.commentize("페이지 TARGET URL RAW 소스 분석중")
-    #                 ment = '지역정보 크롤링 결과'
-    #                 global ment_about_geo
-    #                 ment_about_geo = ment
-    #                 # target_url = 'https://map.naver.com/p'
-    #                 target_url = 'https://www.google.com/search?q=현재위치'
-    #                 DebuggingUtil.print_magenta(target_url)
-    #                 driver.get(target_url)
-    #                 page_src = driver.page_source
-    #                 soup = BeautifulSoup(page_src, "lxml")
-    #                 results: any
-    #                 # results = soup.find_all("body")
-    #                 results: ResultSet = soup.find_all("span", class_="BBwThe")  # 지역정보 한글주소
-    #                 # results: ResultSet = soup.find_all("span", class_="fMYBhe") # 지역정보 영어주소
-    #                 results: str = results[0].text
-    #
-    #                 global results_about_geo
-    #                 results_about_geo = results
-    #                 DebuggingUtil.print_magenta(f"async def {inspect.currentframe().f_code.co_name}() is done...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #
-    #             def run_async_loop1():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 try:
-    #                     # Park4139.debug_as_cli(f"def {inspect.currentframe().f_code.co_name}() is running...")
-    #                     DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                     loop = asyncio.new_event_loop()
-    #                     asyncio.set_event_loop(loop)
-    #                     loop.run_until_complete(crawl_pm_ranking())
-    #                 except:
-    #                     DebuggingUtil.trouble_shoot("%%%FOO%%%")
-    #
-    #             def run_async_loop2():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 # Park4139.debug_as_cli(f"def {inspect.currentframe().f_code.co_name}() is running...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 loop = asyncio.new_event_loop()
-    #                 asyncio.set_event_loop(loop)
-    #                 loop.run_until_complete(crawl_nationwide_ultrafine_dust())
-    #
-    #             def run_async_loop3():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 # Park4139.debug_as_cli(f"def {inspect.currentframe().f_code.co_name}() is running...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 loop = asyncio.new_event_loop()
-    #                 asyncio.set_event_loop(loop)
-    #                 loop.run_until_complete(crawl_naver_weather())
-    #
-    #             def run_async_loop4():
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 # Park4139.debug_as_cli(f"def {inspect.currentframe().f_code.co_name}() is running...")
-    #                 DebuggingUtil.commentize(f"{inspect.currentframe().f_code.co_name}()")
-    #                 loop = asyncio.new_event_loop()
-    #                 asyncio.set_event_loop(loop)
-    #                 loop.run_until_complete(crawl_geo_info())
-    #
-    #             thread1 = threading.Thread(target=run_async_loop1)
-    #             thread1.start()
-    #
-    #             thread2 = threading.Thread(target=run_async_loop2)
-    #             thread2.start()
-    #
-    #             thread3 = threading.Thread(target=run_async_loop3)
-    #             thread3.start()
-    #
-    #             thread4 = threading.Thread(target=run_async_loop4)
-    #             thread4.start()
-    #
-    #             # 모든 쓰레드 끝날때 까지 대기
-    #             thread1.join()
-    #             thread2.join()
-    #             thread3.join()
-    #             thread4.join()
-    #
-    #             TextToSpeechUtil.speak_ments(ment='날씨에 대한 웹크롤링 및 데이터 분석이 성공되었습니다', sleep_after_play=0.65)
-    #             # 함수가 break 로 끝이 나면 창들이 창을 닫아야 dialog 들이 사라지도록 dialog 를 global 처리를 해두었음.
-    #             global dialog4
-    #             global dialog3
-    #             global dialog2
-    #             global dialog1
-    #             dialog3 = UiUtil.CustomQdialog(title=f"{ment_about_naver_weather}", ment=f"{results_about_naver_weather}")
-    #             dialog2 = UiUtil.CustomQdialog(title=f"{title}", ment=f"{results_about_nationwide_ultrafine_dust}")
-    #             dialog1 = UiUtil.CustomQdialog(title=f"{ment_about_geo}", ment=f"{results_about_geo}")
-    #             dialog4 = UiUtil.CustomQdialog(title=f"{ment_about_pm_ranking}", ment=f"{results_about_pm_ranking}")
-    #             dialog1.show()
-    #             dialog2.show()
-    #             dialog3.show()
-    #             dialog4.show()
-    #             break
-    #     except:
-    #         DebuggingUtil.trouble_shoot("%%%FOO%%%")
 
     # @staticmethod
     # def back_up_biggest_targets():
@@ -10649,7 +10784,7 @@ class BusinessLogicUtil:
     #     # app.primaryScreen()의 기능에 대한 대체 방법이 있다면 global app 없애고 싶다, 공유객체로 해소가 될 것 같은데 더 쉬운 방법을 못찾았다
     #     # 유사방법을 쓰긴 했는데 이상하게 동작한다. 대안모색필요
     #
-    #     # Park4139.debug_as_gui(context=f"TEST LOOP ERROR CNT REPORT:", is_app_instance_mode=True)
+    #     # print(context=f"TEST LOOP ERROR CNT REPORT:", is_app_instance_mode=True)
     #
     #     # 시작스케쥴러 설정
     #     # Park4139.run_scheduler_as_thread()# Qthread 가 아니라 Thread 형태 이면 동작은 하는데, 스케쥴러 내에서 pyside6 Qdialog 동작하지 않는다.
@@ -10862,7 +10997,7 @@ class BusinessLogicUtil:
     #     a_tags = soup.find_all("a")
     #
     #     # success
-    #     # BusinessLogicUtil.debug_as_gui(f"{len(a_tags)}")
+    #     # DebuggingUtil.print_magenta_as_gui(f"{len(a_tags)}")
     #
     #     # results를 str으로 처리
     #     # results = ""
@@ -10901,7 +11036,7 @@ class BusinessLogicUtil:
     #     # UiUtil.pop_up_as_complete(title="크롤링결과보고", ment=f"{results}")
     #
     #     # success
-    #     # BusinessLogicUtil.debug_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
+    #     # DebuggingUtil.print_magenta_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
     #
     #     # success
     #     # 비동기로 진행 가능
@@ -10970,7 +11105,7 @@ class BusinessLogicUtil:
     #     # UiUtil.pop_up_as_complete(title="크롤링결과보고", ment=f"{results}")
     #
     #     # success
-    #     # BusinessLogicUtil.debug_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
+    #     # DebuggingUtil.print_magenta_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
     #
     #     # success
     #     # 비동기로 진행 가능
@@ -11029,7 +11164,7 @@ class BusinessLogicUtil:
     #     # UiUtil.pop_up_as_complete(title="크롤링결과보고", ment=f"{results}")
     #
     #     # success
-    #     # BusinessLogicUtil.debug_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
+    #     # DebuggingUtil.print_magenta_as_gui(f"{results}") # 테스트용 팝업    UiUtil 로 옮기는 게 나을 지 고민 중이다.
     #
     #     # success
     #     # 비동기로 진행 가능
@@ -11327,7 +11462,7 @@ class BusinessLogicUtil:
             for file in files:
                 FileSystemUtil.convert_xls_to_xlsx(file)
 
-            # 합병할 파일의 목록을 리스트에 저장
+            # 합병할 파일의 목록을 files_to_merge 에 저장
             file_to_merge_ext = ".xlsx"
             files_to_merge = [f"{dir_path}/{file}" for file in os.listdir(dir_path) if file_to_merge_ext in FileSystemUtil.get_target_as_x(file)]
             [print(sample) for sample in files_to_merge]
@@ -11341,7 +11476,7 @@ class BusinessLogicUtil:
             # files_cnt = len(files_to_merge)
 
             # 엑셀 병합 및 저장
-            merged_file = StateManagementUtil.MERGED_EXCEL_FILE
+            merged_file = StateManagementUtil.FILE_MERGED_EXCEL_XLSX
             merged_cnt = 0
             merged_df = pd.DataFrame()
             for file_path in files_to_merge:
@@ -11350,13 +11485,11 @@ class BusinessLogicUtil:
                 # df = pd.read_excel(file_path, engine = "openpyxl", header=0, usecols = [1, 2,3])  # fail,   sheet_name="Sheet1"  여러 시트가 있을 경우 시트명을 직접 입력하여 dataframe화 # usecols = [0, 2]  컬럼선택
                 df = pd.read_excel(file_path, engine="openpyxl")  # success, 근데 sheet1 만 되고 sheet2 는 무시 된다.
 
-                # 첫줄 제거
-                # df = df.iloc[1:]  # 이번 데이터 구조상, 첫줄 을 제외한 나머지 데이터 선택
+                # df = df.iloc[1:]  # 첫줄 제거, 첫줄 을 제외한 나머지 데이터 선택
 
-                # 마지막줄 제거
-                # df = df.iloc[:-1]  # 이번 데이터 구조상, 마지막줄 제외한 나머지 데이터 선택
+                # df = df.iloc[:-1]  # 마지막줄 제거, 마지막줄 제외한 나머지 데이터 선택
 
-                merged_df = pd.concat([merged_df, df], ignore_index=True)  # 두 데이터프레임 병합
+                merged_df = pd.concat([merged_df, df], ignore_index=True)  # 두 데이터프레임 병합 # df 병합
 
                 merged_cnt = merged_cnt + 1
 
@@ -11446,3 +11579,18 @@ class BusinessLogicUtil:
         tokens = tokens[0]
         print(rf'''tokens : {tokens}''')
         return tokens
+
+    @staticmethod
+    def get_stock_name(ticker):
+        df = MySqlUtil.execute(f"""select * from finance_stock_ticker where ticker="{ticker}" """)
+        return df
+    @staticmethod
+    def get_ticker_by_search(stock_name: str):
+        df1 = MySqlUtil.execute(f"""select * from finance_stock_ticker where stock_name like "%{stock_name}%" """)
+        df2 = MySqlUtil.execute(f"""select * from finance_stock_ticker where stock_name like "%{stock_name.upper()}%" """)
+        df3 = MySqlUtil.execute(f"""select * from finance_stock_ticker where stock_name like "%{stock_name.lower()}%" """)
+        df4 = MySqlUtil.execute(f"""select * from finance_stock_ticker where stock_name like "%{stock_name.capitalize()}%" """)
+        df_merged = pd.concat([df1, df2, df3, df4], ignore_index=True )  # df 세로병합
+        df_dropped_duplication = df_merged.drop_duplicates()
+        df_searched = df_dropped_duplication
+        return df_searched

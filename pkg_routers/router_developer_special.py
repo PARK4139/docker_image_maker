@@ -75,7 +75,7 @@ async def post_upload_files(files: List[UploadFile]):
     # FileSystemUtil.truncate_tree(StateManagementUtil.DIRECTORY_CLOUD)
 
     # 클라이언트에서 보낸파일들 서버의 지정된 디렉토리에 저장
-    UPLOAD_DIR = StateManagementUtil.DIRECTORY_CLOUD
+    UPLOAD_DIR = StateManagementUtil.DIRECTORY_PKG_CLOUD
     for file in files:
         content = await file.read()
         # filename = f"{str(uuid.uuid4())}.jpg"  # uuid로 유니크한 파일명으로 변경

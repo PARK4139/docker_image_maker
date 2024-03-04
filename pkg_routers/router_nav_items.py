@@ -79,7 +79,7 @@ def reset_nav_items():
     with open(NAV_ITEMS_JSON, "w", encoding="utf-8") as file:
         json.dump(dummy_data, file)
         # json.dump(dummy_data, file, ensure_ascii=False)
-    DebuggingUtil.print_ment_blue(f"더미를 {dummy_cnt} 개로 리셋하였습니다")
+    DebuggingUtil.print_magenta(f"더미를 {dummy_cnt} 개로 리셋하였습니다")
     return dummy_data
 
 

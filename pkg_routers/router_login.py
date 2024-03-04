@@ -42,7 +42,7 @@ async def post_member_login1(request: Request):
     # 로그인 한 사람은 로그인화면에 진입 할 수 없습니다.
 
     # 포트폴리오 확인 시 로그인 자동화 설정 일부분
-    request.session['login_cnt'] = "0"
+    request.session['main_page_request_cnt'] = "0"
 
     # html 파일의 form 으로 부터 전송된 데이터 form_data 에 저장
     form_data = await request.form()

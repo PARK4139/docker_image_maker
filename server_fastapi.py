@@ -3,13 +3,11 @@ import inspect
 import os
 from contextlib import asynccontextmanager
 
-import clipboard
 import uvicorn
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.requests import Request
-from pydantic import BaseModel
 from starlette.middleware.exceptions import ExceptionMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -17,9 +15,10 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from pkg_park4139_for_linux import FastapiUtil, MySqlUtil, DebuggingUtil, FileSystemUtil, StateManagementUtil, UvicornUtil, SecurityUtil, BusinessLogicUtil, MemberUtil
-from pkg_routers import router_coding_test_management, router_main, router_nav_items, router_book, router_user, router_developer_special, router_cloud, router_excel_merge, router_customer_service, router_commutation_management, router_login, router_join, router_test_try_1
+from pkg_routers import router_main, router_nav_items, router_book, router_user, router_developer_special, router_cloud, router_excel_merge, router_customer_service, router_commutation, router_login, router_join, router_test_try_1, router_finance_data, router_coding_test
 
 templates = Jinja2Templates(directory=r"pkg_web/templates")
+
 
 # 개발/운영 모드
 StateManagementUtil.is_op_mode = False  # False 이면 dev 모드, 주석하면 op 모드
@@ -68,14 +67,13 @@ async def lifespan(app: FastAPI):
         mode = "dev"
         DebuggingUtil.print_ment_red(f"INFO:{StateManagementUtil.INDENTATION_PROMISED}{os.path.basename(__file__)}를 {mode}모드 로 구동 중입니다")
 
-    # 데이터베이스
-    # SQLALCHEMY_TRACK_MODIFICATIONS
+    # 데이터베이스 제어
     # SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLAlchemy가 데이터베이스의 변경 사항을 추적하는 기능을 활성화 또는 비활성화
     # 대규모 애플리케이션에서는 권장되지 않습니다. SQLALCHEMY_TRACK_MODIFICATIONS = False 로 두는 것이 좋다
     try:
         if not StateManagementUtil.is_op_mode:
-            MySqlUtil.Base.metadata.drop_all(bind=MySqlUtil.engine)  # 개발 중에 drop 필요한 경우가 있음
+            MySqlUtil.Base.metadata.drop_all(bind=MySqlUtil.engine)  # 개발 중에 drop 필요한 경우가 사용
             DebuggingUtil.print_magenta(rf'''INFO:{StateManagementUtil.INDENTATION_PROMISED}데이터베이스 드롭 성공''')
         MySqlUtil.Base.metadata.create_all(bind=MySqlUtil.engine)  # 데이터베이스에, Base 클래스에 정의된 모든 테이블을 생성, 옵션코드, class Item(Base): 다음에 호출되어야 동작한다
         DebuggingUtil.print_magenta(rf'''INFO:{StateManagementUtil.INDENTATION_PROMISED}데이터베이스 테이블 생성 성공''')
@@ -150,6 +148,7 @@ app = FastAPI(lifespan=lifespan, swagger_ui_parameters={"tryItOutEnabled": True}
 # app.mount("/pkg_web", StaticFiles(directory="pkg_web"), name="pkg_web")
 app.mount("/static", StaticFiles(directory="pkg_web/static"), name="static")  # html 에서 /static 오로 찾게되는 것 같음.
 app.mount("/pkg_cloud", StaticFiles(directory="pkg_cloud"), name="pkg_cloud")
+app.mount("/pkg_png", StaticFiles(directory="pkg_png"), name="pkg_png")
 
 # app.encoding = 'utf-8'
 # BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -180,11 +179,12 @@ async def reqeust_validation_exception_handler(request: Request, exc):  # exc : 
         # json 으로 처리
         context = {
             "request": request,
-            "exc_errors": exc.errors(),
-            "exc_body": exc.body,
+
+            # "exc_body": exc.body,
             "exe_detail": exc.detail,
         }
         return JSONResponse(content=context)
+
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc):  # exc : Exception
@@ -198,7 +198,7 @@ async def http_exception_handler(request: Request, exc):  # exc : Exception
         #     "request": request,
         #     "msg": msg,
         #     'status_code': status_code,
-        #     "exc_errors": exc.errors(),
+        #     
         #     "exc_body": exc.body,
         #     "window_location_href": default_redirection_page,
         # }
@@ -215,12 +215,11 @@ async def http_exception_handler(request: Request, exc):  # exc : Exception
         # json 으로 처리
         context = {
             "request": request,
-            "exc_errors": exc.errors(),
-            "exc_body": exc.body,
+
+            # "exc_body": exc.body,
             "exe_detail": exc.detail,
         }
         return JSONResponse(content=context)
-
 
 
 app.add_middleware(ExceptionMiddleware)
@@ -293,6 +292,8 @@ async def check_api_health(request: Request):
     else:
         # 의도적 웹페이지로 리다이렉팅, 테스트용
         return RedirectResponse(url="/web/member")
+
+
 @app.get("/filter/urls", tags=["API 테스트"])
 async def collect_urls(request: Request):
     function_name = inspect.currentframe().f_code.co_name
@@ -316,8 +317,9 @@ async def get_pw_hashed(pw_plain: str):
     pw_hashed = pw_context.hash(pw_plain)
 
     # 테스트용 코드
-    clipboard.copy(pw_hashed)
+    # clipboard.copy(pw_hashed)
     return {"pw_hashed": pw_hashed}
+
 
 app.include_router(router_user.router, prefix="/api", tags=["USER API (DB JSON)"])
 app.include_router(router_book.router, prefix="/api", tags=["BOOK API (DB JSON)"])
@@ -325,12 +327,13 @@ app.include_router(router_nav_items.router, prefix="/api", tags=["nav-items API 
 app.include_router(router_main.router, prefix="/web", tags=["회원관리 메인 웹 (MySql)"])
 app.include_router(router_join.router, prefix="/web", tags=["회원관리 가입 웹 (MySql)"])
 app.include_router(router_login.router, prefix="/web", tags=["회원관리 로그인 웹 (MySql)"])
-app.include_router(router_commutation_management.router, prefix="/web", tags=["근태관리 웹 (MySql)"])
+app.include_router(router_commutation.router, prefix="/web", tags=["근태관리 웹 (MySql)"])
 app.include_router(router_customer_service.router, prefix="/web", tags=["CS 관리 웹 (MySql)"])
 app.include_router(router_excel_merge.router, prefix="/web", tags=["엑셀파일 병합 웹 (Server Local Directory)"])
 app.include_router(router_cloud.router, prefix="/web", tags=["파일공유 웹 (Server Local Directory)"])  # 백업
 app.include_router(router_developer_special.router, prefix="/web", tags=["개발자 웹 (Not Defined)"])
-app.include_router(router_coding_test_management.router, prefix="/coding-test", tags=["코딩 테스트 관리 API (MySql)"])
+app.include_router(router_coding_test.router, prefix="/coding-test", tags=["코딩 테스트 관리 API (MySql)"])
+app.include_router(router_finance_data.router, prefix="/web", tags=["금융정보 웹 (Open Api)"])
 app.include_router(router_test_try_1.router, prefix="/test", tags=["x test try 1"])
 # app.include_router(router_test_try_2.router, prefix="/test", tags=["x test try 2"])
 # app.include_router(router_test_try_3.router, prefix="/test", tags=["x test try 3"])

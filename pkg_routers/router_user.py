@@ -5,11 +5,11 @@ __author__ = 'PARK4139 : Jung Hoon Park'
 import json
 import os
 import random
+import sys
+import traceback
 from uuid import uuid4
 
 from fastapi import APIRouter
-from fastapi import HTTPException
-from fastapi.encoders import jsonable_encoder
 
 from pkg_park4139_for_linux import DebuggingUtil, BusinessLogicUtil, FastapiUtil, SecurityUtil
 from pkg_park4139_for_linux import StateManagementUtil
@@ -46,9 +46,10 @@ def put_user_dummys_reset():
             dummy_data.append(dummy_sample)
         with open(USERS_JSON, "w", encoding="utf-8") as file:
             json.dump(dummy_data, file, ensure_ascii=False)
-        DebuggingUtil.print_ment_blue(f"더미를 {dummy_cnt} 개로 리셋하였습니다")
+        DebuggingUtil.print_magenta(f"더미를 {dummy_cnt} 개로 리셋하였습니다")
         return dummy_data
     except:
+        traceback.print_exc(file=sys.stdout)
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -85,9 +86,10 @@ def post_user_dummys():
         with open(USERS_JSON, "w", encoding="utf-8") as file:
             json.dump(dummy_data, file, ensure_ascii=False)
 
-        DebuggingUtil.print_ment_blue(f"더미를 추가로 {dummy_cnt} 개 생성하였습니다 총 {len(dummy_data)}개의 데이터가 {os.path.basename(USERS_JSON)}에 저장되어 있습니다")
+        DebuggingUtil.print_magenta(f"더미를 추가로 {dummy_cnt} 개 생성하였습니다 총 {len(dummy_data)}개의 데이터가 {os.path.basename(USERS_JSON)}에 저장되어 있습니다")
         return dummy_data
     except:
+        traceback.print_exc(file=sys.stdout)
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -96,14 +98,15 @@ async def get_user_random():
     try:
         USERS = FastapiUtil.init_and_update_json_file(USERS_JSON)
         if len(USERS) > 0:
-            user_choiced = USERS[random.randint(0,len(USERS))]
-            BusinessLogicUtil.print_json_via_jq_pkg(json_list=user_choiced)
-            DebuggingUtil.print_ment_blue(f"{USERS_JSON}에서 랜덤으로 user를 가져왔습니다")
+            user_choiced = USERS[random.randint(0, len(USERS))]
+            # BusinessLogicUtil.print_json_via_jq_pkg(json_list=user_choiced)
+            DebuggingUtil.print_magenta(f"{USERS_JSON}에서 랜덤으로 user를 가져왔습니다")
             return user_choiced
         else:
-            DebuggingUtil.print_ment_blue(rf"{USERS_JSON}에 users가 없습니다")
+            DebuggingUtil.print_magenta(rf"{USERS_JSON}에 users가 없습니다")
             return {"detail": f"{USERS_JSON}에 users가 없습니다"}
     except:
+        traceback.print_exc(file=sys.stdout)
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -111,12 +114,13 @@ async def get_user_random():
 async def get_users():
     USERS = FastapiUtil.init_and_update_json_file(USERS_JSON)
     # 예쁘게 json 출력
-    # BusinessLogicUtil.print_json_via_jq_pkg(json_file=USERS_JSON)
+    # # BusinessLogicUtil.print_json_via_jq_pkg(json_file=USERS_JSON)
 
     # 일렬로 json 출력
     [print(sample) for sample in USERS]
     # return {"users": USERS}
     return USERS
+
 
 @router.get("/user/{index}")
 async def get_user_by_index(index: int):
@@ -124,7 +128,7 @@ async def get_user_by_index(index: int):
         USERS = FastapiUtil.init_and_update_json_file(USERS_JSON)
         if index < len(USERS):
             # 예쁘게 json 출력
-            # BusinessLogicUtil.print_json_via_jq_pkg(json_str=USERS[index])
+            # # BusinessLogicUtil.print_json_via_jq_pkg(json_str=USERS[index])
 
             # 일렬로 json 출력
             DebuggingUtil.print_ment_light_black(USERS[index])
@@ -133,6 +137,7 @@ async def get_user_by_index(index: int):
         DebuggingUtil.print_ment_fail(f"user  인덱스 {index}이 범위({len(USERS)}) 밖에 있습니다.")
         return {"detail": f"user  인덱스 {index}가 범위를 벗어났습니다 ({len(USERS)})."}
     except:
+        traceback.print_exc(file=sys.stdout)
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -156,9 +161,10 @@ async def post_user(user: FastapiUtil.User):
         # USERS_JSON 에 데이터 저장
         with open(USERS_JSON, "w", encoding="utf-8") as file:
             json.dump(existing_data, file, ensure_ascii=False)
-        DebuggingUtil.print_ment_blue(f"{user_data} 를 {os.path.basename(USERS_JSON)}에 저장")
+        DebuggingUtil.print_magenta(f"{user_data} 를 {os.path.basename(USERS_JSON)}에 저장")
         return user_data
     except:
+        traceback.print_exc(file=sys.stdout)
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -169,15 +175,17 @@ async def get_user_by_id(id: str):
         for user in USERS:
             if user['id'] == id:
                 # 예쁘게 json 출력
-                # BusinessLogicUtil.print_json_via_jq_pkg(json_str=user)
+                # # BusinessLogicUtil.print_json_via_jq_pkg(json_str=user)
 
                 # 일렬로 json 출력
                 DebuggingUtil.print_ment_light_black(user)
 
                 return user
         DebuggingUtil.print_ment_fail(f"({len(USERS)}).")
-        return {"detail":f"아이디가 {id}인 User 이 없습니다"}
+        return {"detail": f"아이디가 {id}인 User 이 없습니다"}
     except:
+        traceback.print_exc(file=sys.stdout)
+
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -196,8 +204,10 @@ async def put_user_by_id(user: FastapiUtil.User):
                 DebuggingUtil.print_ment_light_yellow(f"아이디 {user.id} 인 user 이 성공적으로 업데이트되었습니다")
                 return {"message": f"아이디 {user.id} 인 user 이 성공적으로 업데이트되었습니다"}
         DebuggingUtil.print_ment_fail(f"데이터베이스에서 아이디 {user.id} 인 user 이 찾을 수 없습니다.")
-        return {"detail":f"데이터베이스에서 아이디 {user.id} 인 user 을 찾을 수 없습니다"}
+        return {"detail": f"데이터베이스에서 아이디 {user.id} 인 user 을 찾을 수 없습니다"}
     except:
+        traceback.print_exc(file=sys.stdout)
+
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -215,8 +225,10 @@ async def delete_user_by_id(id: str):
                 DebuggingUtil.print_ment_red(f"아이디 {id} 인 user 이 성공적으로 삭제되었습니다.")
                 return {"message": f"아이디 {id} 인 user 이 성공적으로 삭제되었습니다."}
         DebuggingUtil.print_ment_fail(f"데이터베이스에서 아이디 {id} 인 user 이 찾을 수 없습니다.")
-        return {"detail":f"데이터베이스에서 아이디 {id} 인 user 이 찾을 수 없습니다."}
+        return {"detail": f"데이터베이스에서 아이디 {id} 인 user 이 찾을 수 없습니다."}
     except:
+        traceback.print_exc(file=sys.stdout)
+
         return {"detail": f"에러가 발생했습니다"}
 
 
@@ -229,8 +241,9 @@ async def delete_users():
         with open(USERS_JSON, "w", encoding="utf-8") as file:
             json.dump(dummy_data, file, ensure_ascii=False)
 
-        DebuggingUtil.print_ment_blue(f"더미를 0 개로 리셋하였습니다")
+        DebuggingUtil.print_magenta(f"더미를 0 개로 리셋하였습니다")
         return dummy_data
     except:
-        return {"detail": f"에러가 발생했습니다"}
+        traceback.print_exc(file=sys.stdout)
 
+        return {"detail": f"에러가 발생했습니다"}

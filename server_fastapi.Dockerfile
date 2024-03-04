@@ -49,6 +49,11 @@ RUN pip install pandas
 # RUN pip install cryptography
 RUN pip install passlib[bcrypt]
 RUN pip install python-jose[cryptography]
+RUN pip install finance-datareader # 금융 api 종속성
+RUN pip install plotly # finance-datareader 종속성
+RUN pip install pyarrow # pandas 종속성
+RUN pip install html5lib
+RUN pip install yfinance
 
 
 
